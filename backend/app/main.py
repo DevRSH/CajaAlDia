@@ -149,9 +149,11 @@ def seed_alumnos_demo() -> None:
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    """Arranque: datos iniciales."""
-    seed_curso_demo()
-    seed_alumnos_demo()
+    """Arranque: datos iniciales (solo en desarrollo)."""
+    # Solo ejecutar seeding en desarrollo si SEED_DEMO_DATA=true
+    if os.getenv("SEED_DEMO_DATA", "false").lower() == "true":
+        seed_curso_demo()
+        seed_alumnos_demo()
     yield
 
 
