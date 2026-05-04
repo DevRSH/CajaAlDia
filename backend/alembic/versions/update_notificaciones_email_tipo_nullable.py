@@ -36,7 +36,7 @@ def upgrade() -> None:
     )
     
     # Copy data from old table to new table
-    op.execute('INSERT INTO notificaciones_email_new (id, pago_cuota_id, tipo, email_destinatario, asunto, mensaje, estado, enviado_en) SELECT id, pago_cuota_id, "pago", email_destinatario, asunto, mensaje, estado, enviado_en FROM notificaciones_email')
+    op.execute("INSERT INTO notificaciones_email_new (id, pago_cuota_id, tipo, email_destinatario, asunto, mensaje, estado, enviado_en) SELECT id, pago_cuota_id, 'pago', email_destinatario, asunto, mensaje, estado, enviado_en FROM notificaciones_email")
     
     # Drop old table
     op.drop_table('notificaciones_email')
