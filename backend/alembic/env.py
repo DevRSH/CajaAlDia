@@ -5,7 +5,7 @@ from logging.config import fileConfig
 from pathlib import Path
 
 from alembic import context
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import create_engine, pool
 
 # Raíz backend/ en sys.path
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,19 +24,18 @@ database_url = os.getenv("DATABASE_URL")
 if database_url:
     # Railway usa postgres://, SQLAlchemy necesita postgresql://
     database_url = database_url.replace("postgres://", "postgresql://", 1)
-    # Asegurar que tenga el driver psycopg2
-    if not database_url.startswith("postgresql+psycopg2://"):
-        database_url = database_url.replace("postgresql://", "postgresql+psycopg2://", 1)
-    config.set_main_option("sqlalchemy.url", database_url)
+else:
+    # Desarrollo: usar SQLite
+    DB_PATH = ROOT / "cajaaldia.db"
+    database_url = f"sqlite:///{DB_PATH}"
 
 target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
-    url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url,
+        url=database_url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -48,11 +47,8 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
-    configuration = config.get_section(config.config_ini_section) or {}
-    configuration["sqlalchemy.url"] = config.get_main_option("sqlalchemy.url")
-    connectable = engine_from_config(
-        configuration,
-        prefix="sqlalchemy.",
+    connectable = create_engine(
+        database_url,
         poolclass=pool.NullPool,
     )
 
