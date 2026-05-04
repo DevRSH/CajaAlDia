@@ -39,7 +39,7 @@ def upgrade() -> None:
         sa.Column("descripcion", sa.String(200), nullable=False),
         sa.Column("folio", sa.String(64), nullable=False),
         sa.Column("fecha", sa.Date(), nullable=False),
-        sa.Column("anulado", sa.Boolean(), nullable=False, server_default=sa.text("0")),
+        sa.Column("anulado", sa.Boolean(), nullable=False, server_default=sa.false()),
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.UniqueConstraint("folio", name="uq_movimientos_folio"),
     )
