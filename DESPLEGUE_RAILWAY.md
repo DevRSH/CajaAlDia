@@ -46,16 +46,16 @@ He preparado los siguientes archivos para facilitar el despliegue:
 
 ### 2.4 Ejecutar Migraciones
 
-Railway necesita ejecutar las migraciones de Alembic al iniciar. Agrega esto en el comando de inicio:
+Railway necesita ejecutar las migraciones de Alembic al iniciar. **IMPORTANTE:** Las migraciones deben ejecutarse en el Start Command, no en el Build Command, porque la base de datos PostgreSQL no está disponible durante el build.
 
 1. En la pestaña "Settings" del servicio backend
-2. En "Build Command", agrega:
+2. En "Build Command", deja vacío o usa:
    ```
-   pip install -r requirements.txt && alembic upgrade head
+   pip install -r requirements.txt
    ```
-3. En "Start Command", deja:
+3. En "Start Command", usa:
    ```
-   uvicorn app.main:app --host 0.0.0.0 --port $PORT
+   alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
    ```
 
 ### 2.5 Desplegar
