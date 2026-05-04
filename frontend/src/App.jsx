@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import logoUrl from "@assets/logo.png";
+import AccesoPublico from "./pages/AccesoPublico.jsx";
 import Alumnos from "./pages/Alumnos.jsx";
 import Comprobante from "./pages/Comprobante.jsx";
 import Configuracion from "./pages/Configuracion.jsx";
@@ -52,29 +53,37 @@ function ConfiguracionChecker({ children }) {
 
 export default function App() {
   return (
-    <ConfiguracionChecker>
-      <Routes>
-        <Route path="/configuracion" element={<Configuracion />} />
-        <Route
-          path="/*"
-          element={
-            <div className="flex min-h-screen">
-              <Sidebar />
-              <main className="flex-1 md:ml-64">
-                <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/alumnos" element={<Alumnos />} />
-                  <Route path="/cuotas" element={<Cuotas />} />
-                  <Route path="/reportes" element={<Reportes />} />
-                  <Route path="/comprobante/:id" element={<Comprobante />} />
-                  <Route path="/configuracion" element={<Configuracion />} />
-                  <Route path="/public/:codigo_curso" element={<PanelPublico />} />
-                </Routes>
-              </main>
-            </div>
-          }
-        />
-      </Routes>
-    </ConfiguracionChecker>
+    <Routes>
+      <Route path="/public" element={<AccesoPublico />} />
+      <Route path="/public/:codigo_curso" element={<PanelPublico />} />
+      <Route
+        path="/*"
+        element={
+          <ConfiguracionChecker>
+            <Routes>
+              <Route path="/configuracion" element={<Configuracion />} />
+              <Route
+                path="/*"
+                element={
+                  <div className="flex min-h-screen">
+                    <Sidebar />
+                    <main className="flex-1 md:ml-64">
+                      <Routes>
+                        <Route path="/" element={<Dashboard />} />
+                        <Route path="/alumnos" element={<Alumnos />} />
+                        <Route path="/cuotas" element={<Cuotas />} />
+                        <Route path="/reportes" element={<Reportes />} />
+                        <Route path="/comprobante/:id" element={<Comprobante />} />
+                        <Route path="/configuracion" element={<Configuracion />} />
+                      </Routes>
+                    </main>
+                  </div>
+                }
+              />
+            </Routes>
+          </ConfiguracionChecker>
+        }
+      />
+    </Routes>
   );
 }

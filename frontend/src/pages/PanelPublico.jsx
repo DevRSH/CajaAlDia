@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import logoUrl from "@assets/logo.png";
 import MontoDisplay from "../components/MontoDisplay.jsx";
 import { fetchEstadoPublico, getErrorMessage } from "../services/api.js";
 
 export default function PanelPublico() {
   const { codigo_curso } = useParams();
+  const navigate = useNavigate();
   const [datos, setDatos] = useState(null);
   const [error, setError] = useState("");
   const [busqueda, setBusqueda] = useState("");
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     let cancel = false;
@@ -18,9 +20,18 @@ export default function PanelPublico() {
         if (!cancel) {
           setDatos(d);
           setError("");
+          setNotFound(false);
         }
       } catch (err) {
-        if (!cancel) setError(getErrorMessage(err));
+        if (!cancel) {
+          if (err?.response?.status === 404) {
+            setNotFound(true);
+            setError("");
+          } else {
+            setError(getErrorMessage(err));
+            setNotFound(false);
+          }
+        }
       }
     }
     cargar();
@@ -91,7 +102,17 @@ export default function PanelPublico() {
       </header>
 
       <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
-        {error ? (
+        {notFound ? (
+          <div className="rounded-lg bg-red-50 p-8 text-center">
+            <p className="text-lg font-semibold text-danger">Código de curso no encontrado</p>
+            <button
+              onClick={() => navigate("/public")}
+              className="mt-4 rounded-lg bg-primary px-6 py-2 font-semibold text-white transition-colors hover:bg-primary/90"
+            >
+              Intentar de nuevo
+            </button>
+          </div>
+        ) : error ? (
           <p className="rounded-lg bg-red-50 p-4 text-danger">{error}</p>
         ) : (
           datos && (
