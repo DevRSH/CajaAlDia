@@ -1,10 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FileText, Calendar, Users, DollarSign } from "lucide-react";
-import { CURSO_DEMO_ID } from "../constants.js";
+import { getConfiguracion } from "../services/api.js";
 
 export default function Reportes() {
+  const [cursoId, setCursoId] = useState(null);
   const [mes, setMes] = useState(3);
   const [anio, setAnio] = useState(2026);
+
+  async function cargarCurso() {
+    try {
+      const config = await getConfiguracion();
+      if (config.configurada && config.curso) {
+        setCursoId(config.curso.id);
+      }
+    } catch (err) {
+      console.error("Error al cargar curso:", err);
+    }
+  }
+
+  useEffect(() => {
+    cargarCurso();
+  }, []);
 
   const NOMBRES_MESES = [
     "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -15,12 +31,14 @@ export default function Reportes() {
     const base = import.meta.env.VITE_API_URL ?? "";
     let url = "";
     
+    if (!cursoId) return;
+    
     if (tipo === "balance") {
-      url = `${base.replace(/\/$/, "")}/api/reportes/balance?curso_id=${CURSO_DEMO_ID}&mes=${mes}&anio=${anio}`;
+      url = `${base.replace(/\/$/, "")}/api/reportes/balance?curso_id=${cursoId}&mes=${mes}&anio=${anio}`;
     } else if (tipo === "deudores") {
-      url = `${base.replace(/\/$/, "")}/api/reportes/deudores?curso_id=${CURSO_DEMO_ID}&anio=${anio}`;
+      url = `${base.replace(/\/$/, "")}/api/reportes/deudores?curso_id=${cursoId}&anio=${anio}`;
     } else if (tipo === "cuotas") {
-      url = `${base.replace(/\/$/, "")}/api/reportes/cuotas?curso_id=${CURSO_DEMO_ID}&anio=${anio}`;
+      url = `${base.replace(/\/$/, "")}/api/reportes/cuotas?curso_id=${cursoId}&anio=${anio}`;
     }
     
     window.open(url, "_blank");

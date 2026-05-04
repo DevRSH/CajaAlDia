@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { Edit, Trash2 } from "lucide-react";
 import MontoDisplay from "../components/MontoDisplay.jsx";
 import Toast from "../components/Toast.jsx";
-import { CURSO_DEMO_ID } from "../constants.js";
-import { actualizarAlumno, crearAlumno, eliminarAlumno, fetchAlumnos, getErrorMessage } from "../services/api.js";
+import { actualizarAlumno, crearAlumno, eliminarAlumno, fetchAlumnos, getConfiguracion, getErrorMessage } from "../services/api.js";
 
 function formatoMilesChilenos(num) {
   if (!num) return "0";
@@ -11,6 +10,7 @@ function formatoMilesChilenos(num) {
 }
 
 export default function Alumnos() {
+  const [cursoId, setCursoId] = useState(null);
   const [alumnos, setAlumnos] = useState([]);
   const [modal, setModal] = useState(false);
   const [modalDetalle, setModalDetalle] = useState(null);
@@ -41,9 +41,21 @@ export default function Alumnos() {
   const [editApodEmail, setEditApodEmail] = useState("");
   const [editApodTelefono, setEditApodTelefono] = useState("");
 
-  async function cargar() {
+  async function cargarCurso() {
     try {
-      const data = await fetchAlumnos(CURSO_DEMO_ID);
+      const config = await getConfiguracion();
+      if (config.configurada && config.curso) {
+        setCursoId(config.curso.id);
+      }
+    } catch (err) {
+      console.error("Error al cargar curso:", err);
+    }
+  }
+
+  async function cargar() {
+    if (!cursoId) return;
+    try {
+      const data = await fetchAlumnos(cursoId);
       setAlumnos(Array.isArray(data) ? data : []);
     } catch (err) {
       setToast({ visible: true, tipo: "error", mensaje: getErrorMessage(err) });
@@ -51,8 +63,14 @@ export default function Alumnos() {
   }
 
   useEffect(() => {
-    cargar();
+    cargarCurso();
   }, []);
+
+  useEffect(() => {
+    if (cursoId) {
+      cargar();
+    }
+  }, [cursoId]);
 
   function mostrarToast(okMsg, errMsg) {
     if (errMsg) setToast({ visible: true, tipo: "error", mensaje: errMsg });
@@ -85,7 +103,7 @@ export default function Alumnos() {
       }
       setCargando(true);
       await crearAlumno({
-        curso_id: CURSO_DEMO_ID,
+        curso_id: cursoId,
         nombre: nombre.trim(),
         apellido_paterno: apellidoPaterno.trim(),
         apellido_materno: apellidoMaterno.trim() || null,

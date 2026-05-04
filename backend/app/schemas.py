@@ -241,3 +241,61 @@ class NotificacionDeudaResponse(BaseModel):
     notificados: int
     sin_email: int
     detalle: list[NotificacionDeudaDetalle]
+
+
+# Configuración del curso
+
+
+class Directiva(BaseModel):
+    tesorera: str = Field(..., min_length=1, max_length=255)
+    presidenta: str | None = Field(None, max_length=255)
+    secretaria: str | None = Field(None, max_length=255)
+
+
+class CursoCrear(BaseModel):
+    codigo: str = Field(..., min_length=1, max_length=64)
+    nombre: str = Field(..., min_length=1, max_length=255)
+    colegio: str = Field(..., min_length=1, max_length=255)
+    año: int = Field(..., ge=2000, le=2100)
+    directiva: Directiva
+
+    @field_validator("codigo")
+    @classmethod
+    def codigo_sin_espacios(cls, v: str) -> str:
+        if " " in v:
+            raise ValueError("El código no puede contener espacios.")
+        return v
+
+
+class CursoActualizar(BaseModel):
+    codigo: str | None = Field(None, max_length=64)
+    nombre: str | None = Field(None, max_length=255)
+    colegio: str | None = Field(None, max_length=255)
+    año: int | None = Field(None, ge=2000, le=2100)
+    directiva: Directiva | None = None
+
+    @field_validator("codigo")
+    @classmethod
+    def codigo_sin_espacios(cls, v: str | None) -> str | None:
+        if v is not None and " " in v:
+            raise ValueError("El código no puede contener espacios.")
+        return v
+
+
+class CursoResponse(BaseModel):
+    id: str
+    codigo: str
+    nombre: str
+    colegio: str
+    año: int
+    directiva_tesorera: str | None
+    directiva_presidenta: str | None
+    directiva_secretaria: str | None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class ConfiguracionResponse(BaseModel):
+    configurada: bool
+    curso: CursoResponse | None

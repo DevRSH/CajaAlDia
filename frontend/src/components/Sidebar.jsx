@@ -1,18 +1,34 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Calendar, Eye, FileText, Home, Menu, Users, X } from "lucide-react";
+import { Calendar, Eye, FileText, Home, Menu, Settings, Users, X } from "lucide-react";
 import logoUrl from "@assets/logo.png";
+import { getConfiguracion } from "../services/api.js";
 
 export default function Sidebar() {
   const [abierto, setAbierto] = useState(false);
+  const [curso, setCurso] = useState(null);
   const location = useLocation();
+
+  useEffect(() => {
+    async function cargarCurso() {
+      try {
+        const config = await getConfiguracion();
+        if (config.configurada && config.curso) {
+          setCurso(config.curso);
+        }
+      } catch (err) {
+        console.error("Error al cargar curso:", err);
+      }
+    }
+    cargarCurso();
+  }, []);
 
   const navItems = [
     { path: "/", label: "Inicio", icon: Home },
     { path: "/cuotas", label: "Cuotas", icon: Calendar },
     { path: "/alumnos", label: "Alumnos", icon: Users },
     { path: "/reportes", label: "Reportes", icon: FileText },
-    { path: "/public/4BA-2026", label: "Panel Público", icon: Eye },
+    { path: `/public/${curso?.codigo || ""}`, label: "Panel Público", icon: Eye },
   ];
 
   function activo(path) {
@@ -84,7 +100,21 @@ export default function Sidebar() {
 
           {/* Footer */}
           <div className="border-t border-muted/20 px-4 py-3">
-            <p className="text-xs text-muted">Sprint 2 - Gestión de Cuotas</p>
+            {curso && (
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-muted">{curso.nombre}</p>
+                <p className="text-xs text-muted">{curso.colegio}</p>
+                <p className="text-xs text-muted">Tesorera: {curso.directiva_tesorera || "—"}</p>
+              </div>
+            )}
+            <Link
+              to="/configuracion"
+              onClick={() => setAbierto(false)}
+              className="mt-3 flex items-center gap-2 text-xs text-muted hover:text-ink transition-colors"
+            >
+              <Settings size={14} />
+              Configuración
+            </Link>
           </div>
         </div>
       </aside>

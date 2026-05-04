@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import FolioTag from "../components/FolioTag.jsx";
 import MontoDisplay from "../components/MontoDisplay.jsx";
-import { crearMovimiento, getErrorMessage } from "../services/api.js";
-import { CURSO_DEMO_ID } from "../constants.js";
+import { crearMovimiento, getConfiguracion, getErrorMessage } from "../services/api.js";
 
 function fechaHoyInput() {
   const d = new Date();
@@ -30,6 +29,22 @@ function formatoMilesChilenos(num) {
  */
 export default function NuevoMovimiento({ abierto, onCerrar, onExitoGlobal }) {
   const navigate = useNavigate();
+  const [cursoId, setCursoId] = useState(null);
+
+  async function cargarCurso() {
+    try {
+      const config = await getConfiguracion();
+      if (config.configurada && config.curso) {
+        setCursoId(config.curso.id);
+      }
+    } catch (err) {
+      console.error("Error al cargar curso:", err);
+    }
+  }
+
+  useEffect(() => {
+    cargarCurso();
+  }, []);
   const [tipo, setTipo] = useState("ingreso");
   const [montoStr, setMontoStr] = useState("");
   const [descripcion, setDescripcion] = useState("");
@@ -65,8 +80,12 @@ export default function NuevoMovimiento({ abierto, onCerrar, onExitoGlobal }) {
         return;
       }
       setCargando(true);
+      if (!cursoId) {
+        onExitoGlobal?.(null, "No hay curso configurado.");
+        return;
+      }
       const resp = await crearMovimiento({
-        curso_id: CURSO_DEMO_ID,
+        curso_id: cursoId,
         tipo,
         monto,
         descripcion: descripcion.trim(),

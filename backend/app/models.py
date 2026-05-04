@@ -18,6 +18,9 @@ class Curso(Base):
     nombre: Mapped[str] = mapped_column(String(255), nullable=False)
     colegio: Mapped[str] = mapped_column(String(255), nullable=False)
     año: Mapped[int] = mapped_column(Integer, nullable=False)
+    directiva_tesorera: Mapped[str] = mapped_column(String(255), nullable=True)
+    directiva_presidenta: Mapped[str] = mapped_column(String(255), nullable=True)
+    directiva_secretaria: Mapped[str] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.utcnow())
 
     movimientos: Mapped[list["Movimiento"]] = relationship(

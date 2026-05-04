@@ -124,3 +124,25 @@ export async function notificarDeuda(cursoId, anio, alumnoIds) {
   });
   return data;
 }
+
+// Configuración
+
+export async function getConfiguracion() {
+  const { data } = await api.get("/api/configuracion");
+  return data;
+}
+
+export async function crearCurso(data) {
+  const { data: response } = await api.post("/api/configuracion/curso", data);
+  return response;
+}
+
+export async function actualizarCurso(data) {
+  const { data: response } = await api.put("/api/configuracion/curso", data);
+  return response;
+}
+
+export async function resetearCurso() {
+  const { data } = await api.delete("/api/configuracion/curso");
+  return data;
+}

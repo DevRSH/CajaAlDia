@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import MontoDisplay from "../components/MontoDisplay.jsx";
 import Toast from "../components/Toast.jsx";
-import { CURSO_DEMO_ID } from "../constants.js";
+import { getConfiguracion } from "../services/api.js";
 import {
   crearConfigCuota,
   fetchConfigCuotas,
@@ -24,6 +24,7 @@ const NOMBRES_MESES = [
 ];
 
 export default function Cuotas() {
+  const [cursoId, setCursoId] = useState(null);
   const [anio, setAnio] = useState(2026);
   const [configs, setConfigs] = useState([]);
   const [estado, setEstado] = useState(null);
@@ -37,12 +38,24 @@ export default function Cuotas() {
   const [monto, setMonto] = useState("");
   const [descripcion, setDescripcion] = useState("");
 
+  async function cargarCurso() {
+    try {
+      const config = await getConfiguracion();
+      if (config.configurada && config.curso) {
+        setCursoId(config.curso.id);
+      }
+    } catch (err) {
+      console.error("Error al cargar curso:", err);
+    }
+  }
+
   async function cargar() {
+    if (!cursoId) return;
     try {
       const [cfg, est, deud] = await Promise.all([
-        fetchConfigCuotas(CURSO_DEMO_ID, anio),
-        fetchEstadoCuotas(CURSO_DEMO_ID, anio),
-        fetchDeudores(CURSO_DEMO_ID, anio),
+        fetchConfigCuotas(cursoId, anio),
+        fetchEstadoCuotas(cursoId, anio),
+        fetchDeudores(cursoId, anio),
       ]);
       setConfigs(Array.isArray(cfg) ? cfg : []);
       setEstado(est);
@@ -54,8 +67,14 @@ export default function Cuotas() {
   }
 
   useEffect(() => {
-    cargar();
-  }, [anio]);
+    cargarCurso();
+  }, []);
+
+  useEffect(() => {
+    if (cursoId) {
+      cargar();
+    }
+  }, [anio, cursoId]);
 
   function mostrarToast(okMsg, errMsg) {
     if (errMsg) setToast({ visible: true, tipo: "error", mensaje: errMsg });
@@ -76,7 +95,7 @@ export default function Cuotas() {
       }
       setCargando(true);
       await crearConfigCuota({
-        curso_id: CURSO_DEMO_ID,
+        curso_id: cursoId,
         anio,
         mes,
         monto: montoNum,
@@ -181,7 +200,7 @@ export default function Cuotas() {
         return;
       }
       setCargando(true);
-      const resultado = await notificarDeuda(CURSO_DEMO_ID, anio, Array.from(selectedDeudores));
+      const resultado = await notificarDeuda(cursoId, anio, Array.from(selectedDeudores));
       mostrarToast(
         `Se notificó a ${resultado.notificados} apoderados. ${resultado.sin_email} apoderados sin email registrado.`,
         null
@@ -197,7 +216,7 @@ export default function Cuotas() {
   async function notificarTodosDeudores() {
     try {
       setCargando(true);
-      const resultado = await notificarDeuda(CURSO_DEMO_ID, anio, null);
+      const resultado = await notificarDeuda(cursoId, anio, null);
       mostrarToast(
         `Se notificó a ${resultado.notificados} apoderados. ${resultado.sin_email} apoderados sin email registrado.`,
         null

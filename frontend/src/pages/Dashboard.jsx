@@ -3,10 +3,10 @@ import logoUrl from "@assets/logo.png";
 import MontoDisplay from "../components/MontoDisplay.jsx";
 import Toast from "../components/Toast.jsx";
 import NuevoMovimiento from "./NuevoMovimiento.jsx";
-import { CURSO_CODIGO_PUBLICO, CURSO_DEMO_ID } from "../constants.js";
-import { fetchAlumnos, fetchEstadoPublico, fetchMovimientos, getErrorMessage } from "../services/api.js";
+import { fetchAlumnos, fetchEstadoPublico, fetchMovimientos, getConfiguracion, getErrorMessage } from "../services/api.js";
 
 export default function Dashboard() {
+  const [curso, setCurso] = useState(null);
   const [estado, setEstado] = useState(null);
   const [movimientos, setMovimientos] = useState([]);
   const [totalAlumnos, setTotalAlumnos] = useState(0);
@@ -17,10 +17,16 @@ export default function Dashboard() {
 
   async function cargar() {
     try {
+      const config = await getConfiguracion();
+      if (!config.configurada || !config.curso) {
+        return;
+      }
+      setCurso(config.curso);
+
       const [pub, lista, alumnos] = await Promise.all([
-        fetchEstadoPublico(CURSO_CODIGO_PUBLICO),
-        fetchMovimientos(CURSO_DEMO_ID, 1),
-        fetchAlumnos(CURSO_DEMO_ID),
+        fetchEstadoPublico(config.curso.codigo),
+        fetchMovimientos(config.curso.id, 1),
+        fetchAlumnos(config.curso.id),
       ]);
       setEstado(pub);
       setMovimientos(Array.isArray(lista) ? lista : []);
@@ -58,7 +64,7 @@ export default function Dashboard() {
           <div>
             <h1 className="text-2xl font-bold text-primary">CajaAlDía</h1>
             <p className="text-sm text-muted">La plata del curso, siempre a la vista.</p>
-            <p className="mt-1 font-semibold text-ink">{estado?.curso?.nombre ?? "…"}</p>
+            <p className="mt-1 font-semibold text-ink">{curso?.nombre ?? "…"}</p>
           </div>
         </div>
       </header>

@@ -2,6 +2,10 @@
 import logging
 import os
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv
+
+# Cargar variables de entorno desde .env
+load_dotenv()
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
@@ -12,12 +16,12 @@ from sqlalchemy.exc import IntegrityError
 
 from app.database import SessionLocal
 from app.models import Alumno, Apoderado, Curso
-from app.routers import alumnos, cuotas, movimientos, public, reportes
+from app.routers import alumnos, configuracion, cuotas, movimientos, public, reportes
 from app.schemas import HealthResponse
 
 logger = logging.getLogger(__name__)
 
-# UUID fijo sincronizado con el seed del curso demo (frontend puede hardcodear el mismo).
+# UUID fijo sincronizado con el seed del curso demo (solo usado si CURSO_DEMO=true)
 CURSO_DEMO_ID = "c0ffee00-0000-4000-a001-000000000001"
 
 
@@ -39,6 +43,7 @@ def seed_curso_demo() -> None:
             nombre="4° Básico A",
             colegio="Colegio Demo",
             año=2026,
+            directiva_tesorera="Tesorera Demo",
         )
         db.add(curso)
         db.commit()
@@ -149,9 +154,9 @@ def seed_alumnos_demo() -> None:
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    """Arranque: datos iniciales (solo en desarrollo)."""
-    # Solo ejecutar seeding en desarrollo si SEED_DEMO_DATA=true
-    if os.getenv("SEED_DEMO_DATA", "false").lower() == "true":
+    """Arranque: verificar si existe curso. Si no, la app muestra pantalla de configuración."""
+    # Solo ejecutar seeding si CURSO_DEMO=true (desarrollo local con datos demo)
+    if os.getenv("CURSO_DEMO", "false").lower() == "true":
         seed_curso_demo()
         seed_alumnos_demo()
     yield
@@ -217,3 +222,4 @@ app.include_router(public.router)
 app.include_router(alumnos.router)
 app.include_router(cuotas.router)
 app.include_router(reportes.router)
+app.include_router(configuracion.router)
