@@ -24,6 +24,9 @@ database_url = os.getenv("DATABASE_URL")
 if database_url:
     # Railway usa postgres://, SQLAlchemy necesita postgresql://
     database_url = database_url.replace("postgres://", "postgresql://", 1)
+    # Asegurar que tenga el driver psycopg2
+    if not database_url.startswith("postgresql+psycopg2://"):
+        database_url = database_url.replace("postgresql://", "postgresql+psycopg2://", 1)
     config.set_main_option("sqlalchemy.url", database_url)
 
 target_metadata = Base.metadata
