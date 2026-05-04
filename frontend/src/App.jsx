@@ -20,6 +20,7 @@ function ConfiguracionChecker({ children }) {
     async function verificarConfiguracion() {
       try {
         const config = await getConfiguracion();
+        console.log('Configuracion:', config);
         setConfigurada(config.configurada);
       } catch (err) {
         console.error("Error al verificar configuración:", err);
