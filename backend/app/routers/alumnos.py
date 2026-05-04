@@ -3,7 +3,7 @@ import uuid
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -284,9 +284,10 @@ def eliminar_alumno(
             raise HTTPException(status_code=404, detail="No se encontró el alumno indicado.")
 
         # Contar pagos del alumno
-        pagos_count = db.execute(
-            select(PagoCuota).where(PagoCuota.alumno_id == alumno_id)
-        ).count()
+        result = db.execute(
+            select(func.count()).where(PagoCuota.alumno_id == alumno_id)
+        )
+        pagos_count = result.scalar()
 
         # Soft delete
         alumno.activo = False

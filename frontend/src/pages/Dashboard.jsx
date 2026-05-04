@@ -10,6 +10,8 @@ export default function Dashboard() {
   const [estado, setEstado] = useState(null);
   const [movimientos, setMovimientos] = useState([]);
   const [totalAlumnos, setTotalAlumnos] = useState(0);
+  const [alumnosAlDia, setAlumnosAlDia] = useState(0);
+  const [alumnosConDeuda, setAlumnosConDeuda] = useState(0);
   const [modal, setModal] = useState(false);
   const [toast, setToast] = useState({ visible: false, mensaje: "", tipo: "error" });
 
@@ -23,6 +25,8 @@ export default function Dashboard() {
       setEstado(pub);
       setMovimientos(Array.isArray(lista) ? lista : []);
       setTotalAlumnos(Array.isArray(alumnos) ? alumnos.length : 0);
+      setAlumnosAlDia(pub?.resumen_cuotas?.al_dia ?? 0);
+      setAlumnosConDeuda(pub?.resumen_cuotas?.con_deuda ?? 0);
     } catch (err) {
       try {
         setToast({ visible: true, tipo: "error", mensaje: getErrorMessage(err) });
@@ -95,6 +99,14 @@ export default function Dashboard() {
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
               <div className="text-sm text-muted">Total alumnos activos</div>
               <div className="mt-2 text-3xl font-bold text-primary">{totalAlumnos}</div>
+            </div>
+            <div className="rounded-xl border border-success/30 bg-green-50 p-4">
+              <div className="text-sm text-muted">Alumnos al día</div>
+              <div className="mt-2 text-3xl font-bold text-success">{alumnosAlDia}</div>
+            </div>
+            <div className="rounded-xl border border-danger/30 bg-red-50 p-4">
+              <div className="text-sm text-muted">Alumnos con deuda</div>
+              <div className="mt-2 text-3xl font-bold text-danger">{alumnosConDeuda}</div>
             </div>
           </div>
         </section>
