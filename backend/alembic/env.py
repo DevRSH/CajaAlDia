@@ -22,6 +22,8 @@ if config.config_file_name is not None:
 # Obtener DATABASE_URL del entorno (Railway la configura automáticamente)
 database_url = os.getenv("DATABASE_URL")
 if database_url:
+    # Railway usa postgres://, SQLAlchemy necesita postgresql://
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
     config.set_main_option("sqlalchemy.url", database_url)
 
 target_metadata = Base.metadata
