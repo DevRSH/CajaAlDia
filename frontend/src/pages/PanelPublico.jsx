@@ -107,7 +107,7 @@ export default function PanelPublico() {
             <p className="text-lg font-semibold text-danger">Código de curso no encontrado</p>
             <button
               onClick={() => navigate("/public")}
-              className="mt-4 rounded-lg bg-primary px-6 py-2 font-semibold text-white transition-colors hover:bg-primary/90"
+              className="mt-4 rounded-lg bg-primary px-6 py-3 font-semibold text-white transition-colors hover:bg-primary/90"
             >
               Intentar de nuevo
             </button>

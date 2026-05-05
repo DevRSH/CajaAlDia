@@ -27,17 +27,17 @@ export default function Comprobante() {
       <div className="no-print mx-auto flex max-w-3xl flex-wrap gap-3 py-4">
         <button
           type="button"
-          onClick={imprimir}
-          className="rounded-lg bg-primary px-4 py-2 font-medium text-white"
+          className="rounded-lg bg-primary px-4 py-3 font-medium text-white"
+          onClick={() => window.print()}
         >
           Imprimir
         </button>
         <button
           type="button"
+          className="rounded-lg border border-muted/40 bg-surface px-4 py-3 font-medium text-ink"
           onClick={() => navigate("/")}
-          className="rounded-lg border border-muted/40 bg-surface px-4 py-2 font-medium text-ink"
         >
-          Volver al dashboard
+          Volver
         </button>
       </div>
       <iframe

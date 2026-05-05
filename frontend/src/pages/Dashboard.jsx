@@ -70,8 +70,8 @@ export default function Dashboard() {
       </header>
 
       <main className="mx-auto max-w-5xl space-y-6 px-4 py-6">
-        <div className="grid gap-4 md:grid-cols-3">
-          <section className="md:col-span-3 lg:col-span-1 lg:row-span-2">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+          <section className="sm:col-span-3 lg:col-span-1 lg:row-span-2">
             <div className="rounded-2xl border-2 border-primary bg-surface p-6 shadow-md">
               <h2 className="font-semibold text-muted">Saldo disponible</h2>
               <div className="mt-4 text-4xl font-bold text-primary">
@@ -101,7 +101,7 @@ export default function Dashboard() {
 
         <section className="overflow-hidden rounded-2xl border border-muted/20 bg-surface p-6 shadow-sm">
           <h2 className="mb-4 font-semibold text-primary">Resumen rápido</h2>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
               <div className="text-sm text-muted">Total alumnos activos</div>
               <div className="mt-2 text-3xl font-bold text-primary">{totalAlumnos}</div>

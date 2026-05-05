@@ -123,11 +123,10 @@ export default function Reportes() {
               Matriz completa de pagos por alumno y mes, con porcentaje de cobranza.
             </p>
             <button
-              type="button"
-              onClick={() => abrirReporte("cuotas")}
-              className="w-full rounded-lg bg-primary px-4 py-2 font-medium text-white shadow hover:bg-primary/90"
+              type="submit"
+              className="w-full rounded-lg bg-primary px-4 py-3 font-medium text-white shadow hover:bg-primary/90"
             >
-              Ver reporte
+              Generar reporte
             </button>
           </div>
         </div>

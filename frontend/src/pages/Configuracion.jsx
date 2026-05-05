@@ -438,7 +438,7 @@ export default function Configuracion() {
 
         {modalReset && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
+            <div className="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl md:rounded-2xl">
               <h3 className="mb-2 text-xl font-bold text-danger">¿Estás segura?</h3>
               <p className="mb-4 text-muted">Se eliminarán TODOS los datos del curso y no se podrán recuperar.</p>
               <div className="mb-4">
@@ -458,7 +458,7 @@ export default function Configuracion() {
                 <button
                   type="button"
                   onClick={handleCerrarModalReset}
-                  className="flex-1 rounded-xl border border-muted/30 px-4 py-2.5 font-medium text-ink hover:bg-bg"
+                  className="flex-1 rounded-xl border border-muted/30 px-4 py-3 font-medium text-ink hover:bg-bg"
                 >
                   Cancelar
                 </button>
@@ -466,7 +466,7 @@ export default function Configuracion() {
                   type="button"
                   onClick={handleReset}
                   disabled={textoConfirmacion !== "RESETEAR" || guardando}
-                  className="flex-1 rounded-xl bg-danger px-4 py-2.5 font-medium text-white hover:bg-danger/90 disabled:opacity-50"
+                  className="flex-1 rounded-xl bg-danger px-4 py-3 font-medium text-white hover:bg-danger/90 disabled:opacity-50"
                 >
                   {guardando ? "Reseteando..." : "Confirmar"}
                 </button>

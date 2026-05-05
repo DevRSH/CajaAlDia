@@ -242,7 +242,7 @@ export default function Alumnos() {
           <button
             type="button"
             onClick={() => setModal(true)}
-            className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white shadow hover:bg-primary/90"
+            className="rounded-xl bg-primary px-4 py-3 text-sm font-medium text-white shadow hover:bg-primary/90"
           >
             + Agregar alumno
           </button>
@@ -320,7 +320,7 @@ export default function Alumnos() {
       {/* Modal nuevo alumno */}
       {modal && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface p-6 shadow-xl">
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface p-6 shadow-xl md:rounded-2xl">
             <h2 className="mb-4 text-xl font-bold text-primary">Nuevo alumno</h2>
             <form onSubmit={guardar} className="space-y-4">
               <div>
@@ -408,7 +408,7 @@ export default function Alumnos() {
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
-                  className="rounded-lg px-4 py-2 font-medium text-muted hover:bg-bg"
+                  className="rounded-lg px-4 py-3 font-medium text-muted hover:bg-bg"
                   onClick={cerrarModal}
                 >
                   Cancelar
@@ -416,7 +416,7 @@ export default function Alumnos() {
                 <button
                   type="submit"
                   disabled={cargando}
-                  className="rounded-lg bg-primary px-5 py-2 font-medium text-white shadow hover:bg-primary/90 disabled:opacity-60"
+                  className="rounded-lg bg-primary px-5 py-3 font-medium text-white shadow hover:bg-primary/90 disabled:opacity-60"
                 >
                   {cargando ? "Guardando..." : "Guardar"}
                 </button>
@@ -429,7 +429,7 @@ export default function Alumnos() {
       {/* Modal detalle alumno */}
       {modalDetalle && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface p-6 shadow-xl">
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface p-6 shadow-xl md:rounded-2xl">
             <h2 className="mb-4 text-xl font-bold text-primary">{nombreCompleto(modalDetalle)}</h2>
             <div className="space-y-3 text-sm">
               <div>
@@ -457,7 +457,7 @@ export default function Alumnos() {
             <div className="mt-6 flex justify-end">
               <button
                 type="button"
-                className="rounded-lg border border-muted/40 px-4 py-2 font-medium text-ink"
+                className="rounded-lg border border-muted/40 px-4 py-3 font-medium text-ink"
                 onClick={() => setModalDetalle(null)}
               >
                 Cerrar
@@ -470,7 +470,7 @@ export default function Alumnos() {
       {/* Modal edición alumno */}
       {modalEdicion && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface p-6 shadow-xl">
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface p-6 shadow-xl md:rounded-2xl">
             <h2 className="mb-4 text-xl font-bold text-primary">Editar alumno</h2>
             <form onSubmit={guardarEdicion} className="space-y-4">
               <div>
@@ -558,7 +558,7 @@ export default function Alumnos() {
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
-                  className="rounded-lg px-4 py-2 font-medium text-muted hover:bg-bg"
+                  className="rounded-lg px-4 py-3 font-medium text-muted hover:bg-bg"
                   onClick={cerrarEdicion}
                 >
                   Cancelar
@@ -566,7 +566,7 @@ export default function Alumnos() {
                 <button
                   type="submit"
                   disabled={cargando}
-                  className="rounded-lg bg-primary px-5 py-2 font-medium text-white shadow hover:bg-primary/90 disabled:opacity-60"
+                  className="rounded-lg bg-primary px-5 py-3 font-medium text-white shadow hover:bg-primary/90 disabled:opacity-60"
                 >
                   {cargando ? "Guardando..." : "Guardar cambios"}
                 </button>
@@ -579,7 +579,7 @@ export default function Alumnos() {
       {/* Modal confirmar eliminación */}
       {modalEliminar && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-w-md w-full rounded-2xl bg-surface p-6 shadow-xl">
+          <div className="max-w-md w-full rounded-2xl bg-surface p-6 shadow-xl md:rounded-2xl">
             <h2 className="mb-4 text-xl font-bold text-primary">Eliminar alumno</h2>
             <p className="mb-6 text-sm">
               ¿Eliminar a {nombreCompleto(alumnoEliminar)}? Esta acción no se puede deshacer.
@@ -587,7 +587,7 @@ export default function Alumnos() {
             <div className="flex justify-end gap-2">
               <button
                 type="button"
-                className="rounded-lg px-4 py-2 font-medium text-muted hover:bg-bg"
+                className="rounded-lg px-4 py-3 font-medium text-muted hover:bg-bg"
                 onClick={() => {
                   setModalEliminar(false);
                   setAlumnoEliminar(null);
@@ -599,7 +599,7 @@ export default function Alumnos() {
                 type="button"
                 disabled={cargando}
                 onClick={confirmarEliminar}
-                className="rounded-lg bg-danger px-5 py-2 font-medium text-white shadow hover:bg-danger/90 disabled:opacity-60"
+                className="rounded-lg bg-danger px-5 py-3 font-medium text-white shadow hover:bg-danger/90 disabled:opacity-60"
               >
                 {cargando ? "Eliminando..." : "Eliminar"}
               </button>

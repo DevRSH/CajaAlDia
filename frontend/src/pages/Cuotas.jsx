@@ -290,7 +290,7 @@ export default function Cuotas() {
             <button
               type="submit"
               disabled={cargando}
-              className="rounded-lg bg-primary px-5 py-2 font-medium text-white shadow hover:bg-primary/90 disabled:opacity-60"
+              className="rounded-lg bg-primary px-5 py-3 font-medium text-white shadow hover:bg-primary/90 disabled:opacity-60"
             >
               {cargando ? "Guardando..." : "Configurar"}
             </button>
@@ -358,7 +358,7 @@ export default function Cuotas() {
                     type="button"
                     onClick={notificarSeleccionados}
                     disabled={cargando || selectedDeudores.size === 0}
-                    className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow hover:bg-primary/90 disabled:opacity-60"
+                    className="rounded-lg bg-primary px-4 py-3 text-sm font-medium text-white shadow hover:bg-primary/90 disabled:opacity-60"
                   >
                     Notificar seleccionados ({selectedDeudores.size})
                   </button>
@@ -366,7 +366,7 @@ export default function Cuotas() {
                     type="button"
                     onClick={notificarTodosDeudores}
                     disabled={cargando}
-                    className="rounded-lg border border-primary px-4 py-2 text-sm font-medium text-primary hover:bg-primary/5 disabled:opacity-60"
+                    className="rounded-lg border border-primary px-4 py-3 text-sm font-medium text-primary hover:bg-primary/5 disabled:opacity-60"
                   >
                     Notificar a todos los deudores
                   </button>

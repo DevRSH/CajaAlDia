@@ -111,7 +111,7 @@ export default function NuevoMovimiento({ abierto, onCerrar, onExitoGlobal }) {
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4">
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface p-6 shadow-xl">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface p-6 shadow-xl md:rounded-2xl">
         {!creado ? (
           <form onSubmit={guardar} className="space-y-4">
             <h2 className="text-xl font-bold text-primary">Nuevo movimiento</h2>
@@ -192,7 +192,7 @@ export default function NuevoMovimiento({ abierto, onCerrar, onExitoGlobal }) {
             <div className="flex justify-end gap-2 pt-2">
               <button
                 type="button"
-                className="rounded-lg px-4 py-2 font-medium text-muted hover:bg-bg"
+                className="rounded-lg px-4 py-3 font-medium text-muted hover:bg-bg"
                 onClick={onCerrar}
               >
                 Cancelar
@@ -200,7 +200,7 @@ export default function NuevoMovimiento({ abierto, onCerrar, onExitoGlobal }) {
               <button
                 type="submit"
                 disabled={cargando}
-                className="rounded-lg bg-primary px-5 py-2 font-medium text-white shadow hover:bg-primary/90 disabled:opacity-60"
+                className="rounded-lg bg-primary px-5 py-3 font-medium text-white shadow hover:bg-primary/90 disabled:opacity-60"
               >
                 {cargando ? "Guardando..." : "Guardar"}
               </button>
@@ -214,14 +214,14 @@ export default function NuevoMovimiento({ abierto, onCerrar, onExitoGlobal }) {
             <div className="flex flex-wrap gap-2 pt-2">
               <button
                 type="button"
-                className="rounded-lg bg-primary px-4 py-2 font-medium text-white"
+                className="rounded-lg bg-primary px-4 py-3 font-medium text-white"
                 onClick={() => navigate(`/comprobante/${creado.id}`)}
               >
                 Ver comprobante
               </button>
               <button
                 type="button"
-                className="rounded-lg border border-muted/40 px-4 py-2 font-medium text-ink"
+                className="rounded-lg border border-muted/40 px-4 py-3 font-medium text-ink"
                 onClick={onCerrar}
               >
                 Volver al dashboard
