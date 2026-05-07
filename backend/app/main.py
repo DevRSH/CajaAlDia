@@ -2,6 +2,8 @@
 import logging
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Cargar variables de entorno desde .env
@@ -20,6 +22,19 @@ from app.routers import alumnos, configuracion, cuotas, movimientos, public, rep
 from app.schemas import HealthResponse
 
 logger = logging.getLogger(__name__)
+
+
+def run_migrations() -> None:
+    """Ejecuta migraciones Alembic pendientes (upgrade head)."""
+    try:
+        from alembic.config import Config
+        from alembic import command
+
+        alembic_cfg = Config(str(Path(__file__).resolve().parent.parent / "alembic.ini"))
+        command.upgrade(alembic_cfg, "head")
+        logger.info("Migraciones ejecutadas correctamente.")
+    except Exception as e:
+        logger.exception("Error ejecutando migraciones: %s", e)
 
 # UUID fijo sincronizado con el seed del curso demo (solo usado si CURSO_DEMO=true)
 CURSO_DEMO_ID = "c0ffee00-0000-4000-a001-000000000001"
@@ -155,6 +170,7 @@ def seed_alumnos_demo() -> None:
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     """Arranque: verificar si existe curso. Si no, la app muestra pantalla de configuración."""
+    run_migrations()
     # Solo ejecutar seeding si CURSO_DEMO=true (desarrollo local con datos demo)
     if os.getenv("CURSO_DEMO", "false").lower() == "true":
         seed_curso_demo()

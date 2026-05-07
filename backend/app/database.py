@@ -9,6 +9,8 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if DATABASE_URL:
+    # Railway usa postgres://, SQLAlchemy necesita postgresql://
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
     # Producción: PostgreSQL (Railway)
     engine = create_engine(DATABASE_URL, echo=False)
 else:
