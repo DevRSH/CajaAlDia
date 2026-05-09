@@ -17,8 +17,8 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from app.database import SessionLocal
-from app.models import Alumno, Apoderado, ConfigCuota, Curso
-from app.routers import alumnos, configuracion, cuotas, movimientos, public, reportes
+from app.models import Alumno, Apoderado, ConfigCuota, Curso, Usuario
+from app.routers import alumnos, auth, configuracion, cuotas, movimientos, public, reportes
 from app.schemas import HealthResponse
 
 logger = logging.getLogger(__name__)
@@ -212,10 +212,37 @@ def seed_cuota_especial_demo() -> None:
         db.close()
 
 
+def seed_usuario_inicial() -> None:
+    """Crea el usuario tesorera inicial si no existe ningún usuario (idempotente)."""
+    from passlib.context import CryptContext
+    db = SessionLocal()
+    try:
+        existente = db.execute(select(Usuario)).scalar_one_or_none()
+        if existente is not None:
+            return
+        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        usuario = Usuario(
+            nombre="Tesorera",
+            email="tesorera@cajaaldia.cl",
+            password_hash=pwd_context.hash("CajaAlDia2026"),
+            rol="tesorera",
+            activo=True,
+        )
+        db.add(usuario)
+        db.commit()
+        logger.info("Usuario inicial creado: tesorera@cajaaldia.cl / CajaAlDia2026")
+    except Exception as e:
+        db.rollback()
+        logger.exception("Seed usuario inicial falló: %s", e)
+    finally:
+        db.close()
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     """Arranque: verificar si existe curso. Si no, la app muestra pantalla de configuración."""
     run_migrations()
+    seed_usuario_inicial()
     # Solo ejecutar seeding si CURSO_DEMO=true (desarrollo local con datos demo)
     if os.getenv("CURSO_DEMO", "false").lower() == "true":
         seed_curso_demo()
@@ -279,6 +306,7 @@ def health() -> dict:
     return {"status": "ok"}
 
 
+app.include_router(auth.router)
 app.include_router(movimientos.router)
 app.include_router(public.router)
 app.include_router(alumnos.router)

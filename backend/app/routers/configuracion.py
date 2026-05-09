@@ -18,7 +18,9 @@ from app.models import (
     Movimiento,
     NotificacionEmail,
     PagoCuota,
+    Usuario,
 )
+from app.routers.auth import get_current_user
 from app.schemas import ConfiguracionResponse, CursoActualizar, CursoCrear, CursoResponse
 
 router = APIRouter(prefix="/api", tags=["configuracion"])
@@ -38,7 +40,11 @@ def obtener_configuracion(db: Session = Depends(get_db)):
 
 
 @router.post("/configuracion/curso", response_model=CursoResponse)
-def crear_curso_configuracion(body: CursoCrear, db: Session = Depends(get_db)):
+def crear_curso_configuracion(
+    body: CursoCrear,
+    db: Session = Depends(get_db),
+    _usuario: Usuario = Depends(get_current_user),
+):
     """Crea el curso inicial. Solo permitido si no existe ningún curso."""
     try:
         # Verificar si ya existe un curso
@@ -75,7 +81,11 @@ def crear_curso_configuracion(body: CursoCrear, db: Session = Depends(get_db)):
 
 
 @router.put("/configuracion/curso", response_model=CursoResponse)
-def actualizar_curso_configuracion(body: CursoActualizar, db: Session = Depends(get_db)):
+def actualizar_curso_configuracion(
+    body: CursoActualizar,
+    db: Session = Depends(get_db),
+    _usuario: Usuario = Depends(get_current_user),
+):
     """Actualiza los datos del curso existente."""
     try:
         result = db.execute(select(Curso).limit(1))
@@ -115,7 +125,10 @@ def actualizar_curso_configuracion(body: CursoActualizar, db: Session = Depends(
 
 
 @router.delete("/configuracion/curso")
-def resetear_curso_configuracion(db: Session = Depends(get_db)):
+def resetear_curso_configuracion(
+    db: Session = Depends(get_db),
+    _usuario: Usuario = Depends(get_current_user),
+):
     """Elimina el curso y todos sus datos asociados. Solo permitido si ALLOW_RESET=true."""
     if os.getenv("ALLOW_RESET", "false").lower() != "true":
         raise HTTPException(status_code=403, detail="Reset no permitido en este entorno.")

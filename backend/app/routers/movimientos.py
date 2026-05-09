@@ -11,7 +11,8 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.folio_util import construir_folio
-from app.models import Curso, FolioSecuencia, Movimiento
+from app.models import Curso, FolioSecuencia, Movimiento, Usuario
+from app.routers.auth import get_current_user
 from app.schemas import MovimientoCrear, MovimientoResponse
 
 router = APIRouter(prefix="/api", tags=["movimientos"])
@@ -24,6 +25,7 @@ PAGE_SIZE = 20
 def crear_movimiento(
     body: MovimientoCrear,
     db: Session = Depends(get_db),
+    _usuario: Usuario = Depends(get_current_user),
 ):
     try:
         curso = db.execute(select(Curso).where(Curso.id == body.curso_id)).scalar_one_or_none()

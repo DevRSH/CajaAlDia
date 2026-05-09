@@ -7,7 +7,8 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import Alumno, Apoderado, ConfigCuota, Curso, PagoCuota
+from app.models import Alumno, Apoderado, ConfigCuota, Curso, PagoCuota, Usuario
+from app.routers.auth import get_current_user
 from app.schemas import (
     AlumnoActualizar,
     AlumnoCrear,
@@ -61,6 +62,7 @@ def _calcular_estado_cuota(alumno: Alumno, db: Session, año: int) -> EstadoCuot
 def crear_alumno(
     body: AlumnoCrear,
     db: Session = Depends(get_db),
+    _usuario: Usuario = Depends(get_current_user),
 ):
     """Crea un alumno con su apoderado en una sola transacción."""
     try:
@@ -189,6 +191,7 @@ def actualizar_alumno(
     alumno_id: str,
     body: AlumnoActualizar,
     db: Session = Depends(get_db),
+    _usuario: Usuario = Depends(get_current_user),
 ):
     """Actualiza datos del alumno y/o apoderado."""
     try:
@@ -276,6 +279,7 @@ def actualizar_alumno(
 def eliminar_alumno(
     alumno_id: str,
     db: Session = Depends(get_db),
+    _usuario: Usuario = Depends(get_current_user),
 ):
     """Soft delete: marca activo=False. Retorna advertencia si tiene pagos registrados."""
     try:

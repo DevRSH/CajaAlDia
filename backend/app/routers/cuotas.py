@@ -1,4 +1,5 @@
 """Endpoints de gestión de cuotas y pagos."""
+import os
 import uuid
 from datetime import date
 
@@ -19,7 +20,10 @@ from app.models import (
     Movimiento,
     NotificacionEmail,
     PagoCuota,
+    Usuario,
 )
+from app.routers.auth import get_current_user
+from app.services import email_service
 from app.schemas import (
     AlumnoEstadoCuota,
     ConfigCuotaCrear,
@@ -50,6 +54,7 @@ MAX_FOLIO_RETRIES = 8
 def crear_config_cuota(
     body: ConfigCuotaCrear,
     db: Session = Depends(get_db),
+    _usuario: Usuario = Depends(get_current_user),
 ):
     """Crea una configuración de cuota mensual o especial para un curso."""
     try:
@@ -174,9 +179,9 @@ def listar_config_cuotas(
 def notificar_pago(
     pago_id: str,
     db: Session = Depends(get_db),
+    _usuario: Usuario = Depends(get_current_user),
 ):
-    """Simula el envío de una notificación de pago al apoderado."""
-    print(f"DEBUG: notificar_pago llamado con pago_id={pago_id}")
+    """Envía (o reenvía) el comprobante de pago al apoderado."""
     try:
         pago = db.execute(select(PagoCuota).where(PagoCuota.id == pago_id)).scalar_one_or_none()
         if pago is None:
@@ -194,23 +199,45 @@ def notificar_pago(
         if config is None:
             raise HTTPException(status_code=404, detail="No se encontró la configuración de cuota.")
 
-        # Crear registro de notificación (simulado)
+        frontend_url = os.getenv("FRONTEND_URL", "https://cajaaldia.up.railway.app")
+        curso = db.execute(select(Curso).where(Curso.id == config.curso_id)).scalar_one_or_none()
+        verification_url = f"{frontend_url}/public/{curso.codigo if curso else ''}"
+        mes_año = f"{config.mes}/{config.año}" if config.mes else str(config.año)
+        nombre_completo_alumno = f"{alumno.apellido_paterno} {alumno.apellido_materno or ''}, {alumno.nombre}".strip()
+        nombre_apoderado = f"{apoderado.nombre} {apoderado.apellido_paterno}".strip()
+
+        exitoso = email_service.enviar_comprobante_pago(
+            destinatario_email=apoderado.email,
+            destinatario_nombre=nombre_apoderado,
+            alumno_nombre=nombre_completo_alumno,
+            mes_año=mes_año,
+            monto=config.monto,
+            folio=pago.movimiento.folio if pago.movimiento else "",
+            verification_url=verification_url,
+        )
+
+        estado = "enviado" if exitoso else "fallido"
+        error_det = None if exitoso else "Error al comunicarse con Resend."
+
         notif = NotificacionEmail(
             id=str(uuid.uuid4()),
             pago_cuota_id=pago.id,
+            tipo="pago",
             email_destinatario=apoderado.email,
-            asunto=f"Comprobante de pago - CajaAlDía",
-            mensaje=f"Se ha registrado el pago de cuota {config.mes}/{config.año} por ${config.monto}.",
-            estado="simulado",
+            alumno_nombre=nombre_completo_alumno,
+            asunto=f"Comprobante de pago - {mes_año}",
+            mensaje=f"Comprobante de pago {mes_año} por ${config.monto}.",
+            estado=estado,
+            error_detalle=error_det,
         )
         db.add(notif)
         db.commit()
 
         return NotificacionResponse(
-            enviado=True,
+            enviado=exitoso,
             destinatario=apoderado.email,
-            asunto="Comprobante de pago - CajaAlDía",
-            mensaje=f"Se ha registrado el pago de cuota {config.mes}/{config.año}",
+            asunto=f"Comprobante de pago - {mes_año}",
+            mensaje=f"Se ha registrado el pago de cuota {mes_año}",
         )
     except HTTPException:
         raise
@@ -223,6 +250,7 @@ def notificar_pago(
 def registrar_pago_cuota(
     body: PagoCuotaCrear,
     db: Session = Depends(get_db),
+    _usuario: Usuario = Depends(get_current_user),
 ):
     """Registra un pago de cuota creando el movimiento correspondiente."""
     try:
@@ -305,6 +333,41 @@ def registrar_pago_cuota(
                 db.commit()
                 db.refresh(pago)
                 db.refresh(mov)
+
+                # Enviar comprobante por email (no bloquea el pago)
+                apoderado = db.execute(
+                    select(Apoderado).where(Apoderado.alumno_id == alumno.id)
+                ).scalar_one_or_none()
+                if apoderado and apoderado.email:
+                    frontend_url = os.getenv("FRONTEND_URL", "https://cajaaldia.up.railway.app")
+                    verification_url = f"{frontend_url}/public/{config.curso.codigo if config.curso else ''}"
+                    mes_año = f"{config.mes}/{config.año}" if config.mes else str(config.año)
+                    nombre_completo_alumno = f"{alumno.apellido_paterno} {alumno.apellido_materno or ''}, {alumno.nombre}".strip()
+                    nombre_apoderado = f"{apoderado.nombre} {apoderado.apellido_paterno}".strip()
+                    exitoso = email_service.enviar_comprobante_pago(
+                        destinatario_email=apoderado.email,
+                        destinatario_nombre=nombre_apoderado,
+                        alumno_nombre=nombre_completo_alumno,
+                        mes_año=mes_año,
+                        monto=config.monto,
+                        folio=folio,
+                        verification_url=verification_url,
+                    )
+                    estado_email = "enviado" if exitoso else "fallido"
+                    error_det = None if exitoso else "Error al comunicarse con Resend."
+                    notif = NotificacionEmail(
+                        id=str(uuid.uuid4()),
+                        pago_cuota_id=pago.id,
+                        tipo="pago",
+                        email_destinatario=apoderado.email,
+                        alumno_nombre=nombre_completo_alumno,
+                        asunto=f"Comprobante de pago - {mes_año}",
+                        mensaje=f"Comprobante de pago {mes_año} por ${config.monto}.",
+                        estado=estado_email,
+                        error_detalle=error_det,
+                    )
+                    db.add(notif)
+                    db.commit()
 
                 return PagoCuotaConMovimiento(
                     pago=PagoCuotaResponse(
@@ -556,12 +619,61 @@ def listar_deudores(
         raise HTTPException(status_code=500, detail=f"Error al listar deudores: {e!s}") from e
 
 
+@router.get("/cuotas/historial-notificaciones")
+def historial_notificaciones(
+    curso_id: str = Query(..., description="UUID del curso"),
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+    tipo: str | None = Query(None, description="Filtrar por tipo: pago | deuda"),
+    db: Session = Depends(get_db),
+):
+    """Lista el historial de notificaciones de email para el curso, ordenado por fecha desc."""
+    try:
+        # Obtener todos los pago_cuota_ids del curso
+        pagos_ids = db.execute(
+            select(PagoCuota.id)
+            .join(ConfigCuota, PagoCuota.config_cuota_id == ConfigCuota.id)
+            .where(ConfigCuota.curso_id == curso_id)
+        ).scalars().all()
+
+        # Notificaciones de deuda (pago_cuota_id=NULL) y de pago del curso
+        stmt = select(NotificacionEmail).where(
+            (NotificacionEmail.pago_cuota_id.in_(pagos_ids)) |
+            (NotificacionEmail.pago_cuota_id.is_(None))
+        )
+        if tipo:
+            stmt = stmt.where(NotificacionEmail.tipo == tipo)
+        stmt = stmt.order_by(NotificacionEmail.enviado_en.desc())
+
+        offset = (page - 1) * size
+        notifs = db.execute(stmt.offset(offset).limit(size)).scalars().all()
+
+        resultado = []
+        for n in notifs:
+            resultado.append({
+                "id": n.id,
+                "pago_cuota_id": n.pago_cuota_id,
+                "tipo": n.tipo,
+                "email_destinatario": n.email_destinatario,
+                "alumno_nombre": n.alumno_nombre,
+                "asunto": n.asunto,
+                "estado": n.estado,
+                "error_detalle": n.error_detalle,
+                "enviado_en": n.enviado_en.isoformat() if n.enviado_en else None,
+            })
+
+        return {"page": page, "size": size, "items": resultado}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener historial: {e!s}") from e
+
+
 @router.post("/cuotas/notificar-deuda", response_model=NotificacionDeudaResponse)
 def notificar_deuda(
     body: NotificacionDeudaRequest,
     db: Session = Depends(get_db),
+    _usuario: Usuario = Depends(get_current_user),
 ):
-    """Envía notificaciones de deuda a apoderados (simulado)."""
+    """Envía notificaciones de deuda a apoderados."""
     try:
         curso = db.execute(select(Curso).where(Curso.id == body.curso_id)).scalar_one_or_none()
         if curso is None:
@@ -641,14 +753,31 @@ def notificar_deuda(
             nombre_completo_alumno = f"{alumno.apellido_paterno} {alumno.apellido_materno or ''}, {alumno.nombre}".strip()
             nombre_apoderado = f"{apoderado.nombre} {apoderado.apellido_paterno}".strip()
             
+            frontend_url = os.getenv("FRONTEND_URL", "https://cajaaldia.up.railway.app")
+            panel_url = f"{frontend_url}/public/{curso.codigo}"
+
+            exitoso = email_service.enviar_notificacion_deuda(
+                destinatario_email=apoderado.email,
+                destinatario_nombre=nombre_apoderado,
+                alumno_nombre=nombre_completo_alumno,
+                meses_pendientes=meses_pendientes,
+                monto_total=monto_total,
+                curso_nombre=curso.nombre,
+                panel_url=panel_url,
+            )
+            estado_email = "enviado" if exitoso else "fallido"
+            error_det = None if exitoso else "Error al comunicarse con Resend."
+
             notif = NotificacionEmail(
                 id=str(uuid.uuid4()),
                 pago_cuota_id=None,
                 tipo="deuda",
                 email_destinatario=apoderado.email,
-                asunto="Estado de cuenta - CajaAlDía",
-                mensaje=f"Estimado/a {nombre_apoderado}, le informamos que {nombre_completo_alumno} tiene {meses_pendientes} mes(es) pendiente(s) por un total de ${monto_total}. Por favor regularice su situación.",
-                estado="simulado",
+                alumno_nombre=nombre_completo_alumno,
+                asunto=f"Estado de cuenta - {curso.nombre}",
+                mensaje=f"Estimado/a {nombre_apoderado}, {nombre_completo_alumno} tiene {meses_pendientes} mes(es) pendiente(s) por un total de ${monto_total}.",
+                estado=estado_email,
+                error_detalle=error_det,
             )
             db.add(notif)
             notificados += 1

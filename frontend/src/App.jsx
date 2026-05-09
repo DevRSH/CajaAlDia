@@ -7,10 +7,21 @@ import Comprobante from "./pages/Comprobante.jsx";
 import Configuracion from "./pages/Configuracion.jsx";
 import Cuotas from "./pages/Cuotas.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
+import HistorialComunicaciones from "./pages/HistorialComunicaciones.jsx";
+import Login from "./pages/Login.jsx";
 import PanelPublico from "./pages/PanelPublico.jsx";
 import Reportes from "./pages/Reportes.jsx";
 import Sidebar from "./components/Sidebar.jsx";
 import { getConfiguracion } from "./services/api.js";
+
+function RequiereAuth({ children }) {
+  const token = localStorage.getItem("cajaaldia_token");
+  const location = useLocation();
+  if (!token) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+  return children;
+}
 
 function ConfiguracionChecker({ children }) {
   const [configurada, setConfigurada] = useState(null);
@@ -54,34 +65,41 @@ function ConfiguracionChecker({ children }) {
 export default function App() {
   return (
     <Routes>
+      {/* Rutas públicas sin login */}
+      <Route path="/login" element={<Login />} />
       <Route path="/public" element={<AccesoPublico />} />
       <Route path="/public/:codigo_curso" element={<PanelPublico />} />
+
+      {/* Rutas protegidas */}
       <Route
         path="/*"
         element={
-          <ConfiguracionChecker>
-            <Routes>
-              <Route path="/configuracion" element={<Configuracion />} />
-              <Route
-                path="/*"
-                element={
-                  <div className="flex min-h-screen w-full max-w-full overflow-x-hidden">
-                    <Sidebar />
-                    <main className="flex-1 w-full md:ml-64">
-                      <Routes>
-                        <Route path="/" element={<Dashboard />} />
-                        <Route path="/alumnos" element={<Alumnos />} />
-                        <Route path="/cuotas" element={<Cuotas />} />
-                        <Route path="/reportes" element={<Reportes />} />
-                        <Route path="/comprobante/:id" element={<Comprobante />} />
-                        <Route path="/configuracion" element={<Configuracion />} />
-                      </Routes>
-                    </main>
-                  </div>
-                }
-              />
-            </Routes>
-          </ConfiguracionChecker>
+          <RequiereAuth>
+            <ConfiguracionChecker>
+              <Routes>
+                <Route path="/configuracion" element={<Configuracion />} />
+                <Route
+                  path="/*"
+                  element={
+                    <div className="flex min-h-screen w-full max-w-full overflow-x-hidden">
+                      <Sidebar />
+                      <main className="flex-1 w-full md:ml-64">
+                        <Routes>
+                          <Route path="/" element={<Dashboard />} />
+                          <Route path="/alumnos" element={<Alumnos />} />
+                          <Route path="/cuotas" element={<Cuotas />} />
+                          <Route path="/reportes" element={<Reportes />} />
+                          <Route path="/comprobante/:id" element={<Comprobante />} />
+                          <Route path="/configuracion" element={<Configuracion />} />
+                          <Route path="/historial" element={<HistorialComunicaciones />} />
+                        </Routes>
+                      </main>
+                    </div>
+                  }
+                />
+              </Routes>
+            </ConfiguracionChecker>
+          </RequiereAuth>
         }
       />
     </Routes>

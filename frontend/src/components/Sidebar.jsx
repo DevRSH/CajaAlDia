@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Calendar, Eye, FileText, Home, Menu, Settings, Users, X } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Calendar, Eye, FileText, Home, LogOut, Mail, Menu, Settings, Users, X } from "lucide-react";
 import logoUrl from "@assets/logo.png";
-import { getConfiguracion } from "../services/api.js";
+import { getConfiguracion, logout } from "../services/api.js";
 
 export default function Sidebar() {
   const [abierto, setAbierto] = useState(false);
   const [curso, setCurso] = useState(null);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const usuarioGuardado = localStorage.getItem("cajaaldia_usuario");
+  const usuario = usuarioGuardado ? JSON.parse(usuarioGuardado) : null;
 
   useEffect(() => {
     async function cargarCurso() {
@@ -23,11 +27,17 @@ export default function Sidebar() {
     cargarCurso();
   }, []);
 
+  async function cerrarSesion() {
+    await logout();
+    navigate("/login", { replace: true });
+  }
+
   const navItems = [
     { path: "/", label: "Inicio", icon: Home },
     { path: "/cuotas", label: "Cuotas", icon: Calendar },
     { path: "/alumnos", label: "Alumnos", icon: Users },
     { path: "/reportes", label: "Reportes", icon: FileText },
+    { path: "/historial", label: "Comunicaciones", icon: Mail },
     { path: `/public/${curso?.codigo || ""}`, label: "Panel Público", icon: Eye },
   ];
 
@@ -106,22 +116,39 @@ export default function Sidebar() {
           </nav>
 
           {/* Footer */}
-          <div className="border-t border-muted/20 px-4 py-3">
+          <div className="border-t border-muted/20 px-4 py-3 space-y-3">
             {curso && (
               <div className="space-y-1">
                 <p className="text-xs font-medium text-muted">{curso.nombre}</p>
                 <p className="text-xs text-muted">{curso.colegio}</p>
-                <p className="text-xs text-muted">Tesorera: {curso.directiva_tesorera || "—"}</p>
               </div>
             )}
+
+            {/* Usuario logueado */}
+            {usuario && (
+              <div className="rounded-lg bg-primary/5 px-3 py-2">
+                <p className="text-xs font-semibold text-primary truncate">{usuario.nombre}</p>
+                <p className="text-xs text-muted truncate">{usuario.email}</p>
+              </div>
+            )}
+
             <Link
               to="/configuracion"
               onClick={() => setAbierto(false)}
-              className="mt-3 flex items-center gap-2 text-xs text-muted hover:text-ink transition-colors"
+              className="flex items-center gap-2 text-xs text-muted hover:text-ink transition-colors"
             >
               <Settings size={14} />
               Configuración
             </Link>
+
+            <button
+              type="button"
+              onClick={cerrarSesion}
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-danger hover:bg-danger/5 transition-colors"
+            >
+              <LogOut size={16} />
+              Cerrar sesión
+            </button>
           </div>
         </div>
       </aside>

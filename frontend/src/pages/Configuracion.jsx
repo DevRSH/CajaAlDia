@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logoUrl from "@assets/logo.png";
 import Toast from "../components/Toast.jsx";
-import { actualizarCurso, crearCurso, getConfiguracion, getErrorMessage, resetearCurso } from "../services/api.js";
+import { actualizarCurso, cambiarPassword, crearCurso, getConfiguracion, getErrorMessage, resetearCurso } from "../services/api.js";
 
 export default function Configuracion() {
   const navigate = useNavigate();
@@ -12,6 +12,8 @@ export default function Configuracion() {
   const [toast, setToast] = useState({ visible: false, mensaje: "", tipo: "error" });
   const [modalReset, setModalReset] = useState(false);
   const [textoConfirmacion, setTextoConfirmacion] = useState("");
+  const [guardandoPass, setGuardandoPass] = useState(false);
+  const [formPass, setFormPass] = useState({ actual: "", nueva: "", confirmar: "" });
 
   const [formData, setFormData] = useState({
     codigo: "",
@@ -83,6 +85,28 @@ export default function Configuracion() {
       setToast({ visible: true, tipo: "error", mensaje: getErrorMessage(err) });
     } finally {
       setGuardando(false);
+    }
+  }
+
+  async function handleCambiarPassword(e) {
+    e.preventDefault();
+    if (formPass.nueva !== formPass.confirmar) {
+      setToast({ visible: true, tipo: "error", mensaje: "Las contraseñas nuevas no coinciden." });
+      return;
+    }
+    if (formPass.nueva.length < 8) {
+      setToast({ visible: true, tipo: "error", mensaje: "La nueva contraseña debe tener al menos 8 caracteres." });
+      return;
+    }
+    setGuardandoPass(true);
+    try {
+      await cambiarPassword(formPass.actual, formPass.nueva);
+      setToast({ visible: true, tipo: "success", mensaje: "Contraseña actualizada correctamente." });
+      setFormPass({ actual: "", nueva: "", confirmar: "" });
+    } catch (err) {
+      setToast({ visible: true, tipo: "error", mensaje: getErrorMessage(err) });
+    } finally {
+      setGuardandoPass(false);
     }
   }
 
@@ -429,6 +453,62 @@ export default function Configuracion() {
             Resetear y comenzar de nuevo
           </button>
         </form>
+
+        {/* Sección Seguridad */}
+        <div className="overflow-hidden rounded-2xl border border-muted/20 bg-surface p-4 shadow-sm sm:p-6">
+          <h3 className="mb-1 font-semibold text-primary">Seguridad</h3>
+          <p className="mb-4 text-sm text-muted">Actualiza tu contraseña de acceso</p>
+          <form onSubmit={handleCambiarPassword} className="space-y-4 max-w-md">
+            <div>
+              <label htmlFor="pass_actual" className="mb-1 block text-sm font-medium text-ink">
+                Contraseña actual
+              </label>
+              <input
+                type="password"
+                id="pass_actual"
+                value={formPass.actual}
+                onChange={(e) => setFormPass((p) => ({ ...p, actual: e.target.value }))}
+                required
+                className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <div>
+              <label htmlFor="pass_nueva" className="mb-1 block text-sm font-medium text-ink">
+                Nueva contraseña
+              </label>
+              <input
+                type="password"
+                id="pass_nueva"
+                value={formPass.nueva}
+                onChange={(e) => setFormPass((p) => ({ ...p, nueva: e.target.value }))}
+                required
+                minLength={8}
+                className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+              <p className="mt-1 text-xs text-muted">Mínimo 8 caracteres</p>
+            </div>
+            <div>
+              <label htmlFor="pass_confirmar" className="mb-1 block text-sm font-medium text-ink">
+                Confirmar nueva contraseña
+              </label>
+              <input
+                type="password"
+                id="pass_confirmar"
+                value={formPass.confirmar}
+                onChange={(e) => setFormPass((p) => ({ ...p, confirmar: e.target.value }))}
+                required
+                className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={guardandoPass}
+              className="h-12 rounded-xl bg-primary px-6 py-3 font-medium text-white shadow-md hover:bg-primary/90 disabled:opacity-50"
+            >
+              {guardandoPass ? "Actualizando..." : "Actualizar contraseña"}
+            </button>
+          </form>
+        </div>
 
         <Toast
           visible={toast.visible}

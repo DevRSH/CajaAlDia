@@ -2,11 +2,26 @@
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.dialects.sqlite import CHAR
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+
+class Usuario(Base):
+    """Usuario del sistema (tesorera, directiva, admin)."""
+
+    __tablename__ = "usuarios"
+    __table_args__ = (UniqueConstraint("email", name="uq_usuarios_email"),)
+
+    id: Mapped[str] = mapped_column(CHAR(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    nombre: Mapped[str] = mapped_column(String(255), nullable=False)
+    email: Mapped[str] = mapped_column(String(255), nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    rol: Mapped[str] = mapped_column(String(50), nullable=False, default="tesorera")
+    activo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.utcnow())
 
 
 class Curso(Base):
@@ -173,7 +188,7 @@ class PagoCuota(Base):
 
 
 class NotificacionEmail(Base):
-    """Registro de notificaciones enviadas a apoderados (simulado por ahora)."""
+    """Registro de notificaciones enviadas a apoderados."""
 
     __tablename__ = "notificaciones_email"
 
@@ -181,9 +196,11 @@ class NotificacionEmail(Base):
     pago_cuota_id: Mapped[str] = mapped_column(CHAR(36), ForeignKey("pagos_cuotas.id", ondelete="CASCADE"), nullable=True)
     tipo: Mapped[str] = mapped_column(String(20), nullable=False, default="pago")
     email_destinatario: Mapped[str] = mapped_column(String(255), nullable=False)
+    alumno_nombre: Mapped[str] = mapped_column(String(255), nullable=True)
     asunto: Mapped[str] = mapped_column(String(255), nullable=False)
     mensaje: Mapped[str] = mapped_column(String(500), nullable=False)
     estado: Mapped[str] = mapped_column(String(50), nullable=False, default="simulado")
+    error_detalle: Mapped[str] = mapped_column(Text, nullable=True)
     enviado_en: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.utcnow())
 
     pago_cuota: Mapped["PagoCuota"] = relationship(back_populates="notificaciones")

@@ -10,6 +10,31 @@ export const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+// Interceptor de request: agrega token JWT a todas las peticiones
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("cajaaldia_token");
+  if (token) {
+    config.headers["Authorization"] = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Interceptor de response: si el servidor retorna 401, limpiar token y redirigir a /login
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.response?.status === 401) {
+      const rutaActual = window.location.pathname;
+      if (rutaActual !== "/login") {
+        localStorage.removeItem("cajaaldia_token");
+        localStorage.removeItem("cajaaldia_usuario");
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 /**
  * Extrae mensaje de error del backend `{ detail }` o texto genérico.
  */
@@ -26,6 +51,37 @@ export function getErrorMessage(error) {
   } catch (_) {
     return "Ocurrió un error desconocido.";
   }
+}
+
+// Auth
+
+export async function login(email, password) {
+  const { data } = await api.post("/api/auth/login", { email, password });
+  return data;
+}
+
+export async function logout() {
+  try {
+    await api.post("/api/auth/logout");
+  } catch (_) {
+    // Si falla el logout en el servidor igual limpiamos localmente
+  } finally {
+    localStorage.removeItem("cajaaldia_token");
+    localStorage.removeItem("cajaaldia_usuario");
+  }
+}
+
+export async function getMe() {
+  const { data } = await api.get("/api/auth/me");
+  return data;
+}
+
+export async function cambiarPassword(passwordActual, passwordNuevo) {
+  const { data } = await api.post("/api/auth/cambiar-password", {
+    password_actual: passwordActual,
+    password_nuevo: passwordNuevo,
+  });
+  return data;
 }
 
 export async function fetchEstadoPublico(codigoCurso) {
@@ -164,5 +220,14 @@ export async function actualizarCurso(data) {
 
 export async function resetearCurso() {
   const { data } = await api.delete("/api/configuracion/curso");
+  return data;
+}
+
+// Historial notificaciones
+
+export async function fetchHistorialNotificaciones(cursoId, page = 1, size = 20, tipo = null) {
+  const params = { curso_id: cursoId, page, size };
+  if (tipo) params.tipo = tipo;
+  const { data } = await api.get("/api/cuotas/historial-notificaciones", { params });
   return data;
 }
