@@ -118,6 +118,7 @@ class ConfigCuota(Base):
     descripcion: Mapped[str] = mapped_column(String(200), nullable=False)
     tipo: Mapped[str] = mapped_column(String(20), nullable=False, default="curso")  # "curso" | "especial"
     nombre_especial: Mapped[str | None] = mapped_column(String(200), nullable=True)  # Solo para tipo="especial"
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.utcnow())
 
     curso: Mapped["Curso"] = relationship()
     pagos: Mapped[list["PagoCuota"]] = relationship(back_populates="config_cuota")
