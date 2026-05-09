@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logoUrl from "@assets/logo.png";
 import Toast from "../components/Toast.jsx";
-import { actualizarCurso, cambiarPassword, crearCurso, getConfiguracion, getErrorMessage, resetearCurso } from "../services/api.js";
+import { actualizarCurso, actualizarPerfil, cambiarPassword, crearCurso, getConfiguracion, getErrorMessage, resetearCurso } from "../services/api.js";
 
 export default function Configuracion() {
   const navigate = useNavigate();
@@ -14,6 +14,13 @@ export default function Configuracion() {
   const [textoConfirmacion, setTextoConfirmacion] = useState("");
   const [guardandoPass, setGuardandoPass] = useState(false);
   const [formPass, setFormPass] = useState({ actual: "", nueva: "", confirmar: "" });
+  const [guardandoPerfil, setGuardandoPerfil] = useState(false);
+  const usuarioGuardado = localStorage.getItem("cajaaldia_usuario");
+  const usuarioActual = usuarioGuardado ? JSON.parse(usuarioGuardado) : null;
+  const [formPerfil, setFormPerfil] = useState({
+    nombre: usuarioActual?.nombre || "",
+    email: usuarioActual?.email || "",
+  });
 
   const [formData, setFormData] = useState({
     codigo: "",
@@ -22,8 +29,11 @@ export default function Configuracion() {
     año: new Date().getFullYear(),
     directiva: {
       tesorera: "",
+      tesorera_email: "",
       presidenta: "",
+      presidenta_email: "",
       secretaria: "",
+      secretaria_email: "",
     },
   });
 
@@ -39,8 +49,11 @@ export default function Configuracion() {
           año: config.curso.año,
           directiva: {
             tesorera: config.curso.directiva_tesorera || "",
+            tesorera_email: config.curso.directiva_tesorera_email || "",
             presidenta: config.curso.directiva_presidenta || "",
+            presidenta_email: config.curso.directiva_presidenta_email || "",
             secretaria: config.curso.directiva_secretaria || "",
+            secretaria_email: config.curso.directiva_secretaria_email || "",
           },
         });
       }
@@ -85,6 +98,21 @@ export default function Configuracion() {
       setToast({ visible: true, tipo: "error", mensaje: getErrorMessage(err) });
     } finally {
       setGuardando(false);
+    }
+  }
+
+  async function handleActualizarPerfil(e) {
+    e.preventDefault();
+    setGuardandoPerfil(true);
+    try {
+      const datos = await actualizarPerfil(formPerfil.nombre, formPerfil.email);
+      const nuevoUsuario = { ...usuarioActual, ...datos };
+      localStorage.setItem("cajaaldia_usuario", JSON.stringify(nuevoUsuario));
+      setToast({ visible: true, tipo: "success", mensaje: "Perfil actualizado correctamente." });
+    } catch (err) {
+      setToast({ visible: true, tipo: "error", mensaje: getErrorMessage(err) });
+    } finally {
+      setGuardandoPerfil(false);
     }
   }
 
@@ -234,47 +262,35 @@ export default function Configuracion() {
             <div>
               <h3 className="mb-3 font-semibold text-primary">Directiva</h3>
               <div className="space-y-4">
-                <div>
-                  <label htmlFor="directiva_tesorera" className="mb-1 block text-sm font-medium text-ink">
-                    Nombre de la Tesorera *
-                  </label>
-                  <input
-                    type="text"
-                    id="directiva_tesorera"
-                    name="directiva_tesorera"
-                    value={formData.directiva.tesorera}
-                    onChange={handleChange}
-                    required
-                    className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <div>
+                    <label htmlFor="directiva_tesorera" className="mb-1 block text-sm font-medium text-ink">Nombre de la Tesorera *</label>
+                    <input type="text" id="directiva_tesorera" name="directiva_tesorera" value={formData.directiva.tesorera} onChange={handleChange} required className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  </div>
+                  <div>
+                    <label htmlFor="directiva_tesorera_email" className="mb-1 block text-sm font-medium text-ink">Email Tesorera (opcional)</label>
+                    <input type="email" id="directiva_tesorera_email" name="directiva_tesorera_email" value={formData.directiva.tesorera_email} onChange={handleChange} className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  </div>
                 </div>
-
-                <div>
-                  <label htmlFor="directiva_presidenta" className="mb-1 block text-sm font-medium text-ink">
-                    Nombre de la Presidenta (opcional)
-                  </label>
-                  <input
-                    type="text"
-                    id="directiva_presidenta"
-                    name="directiva_presidenta"
-                    value={formData.directiva.presidenta}
-                    onChange={handleChange}
-                    className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <div>
+                    <label htmlFor="directiva_presidenta" className="mb-1 block text-sm font-medium text-ink">Nombre de la Presidenta (opcional)</label>
+                    <input type="text" id="directiva_presidenta" name="directiva_presidenta" value={formData.directiva.presidenta} onChange={handleChange} className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  </div>
+                  <div>
+                    <label htmlFor="directiva_presidenta_email" className="mb-1 block text-sm font-medium text-ink">Email Presidenta (opcional)</label>
+                    <input type="email" id="directiva_presidenta_email" name="directiva_presidenta_email" value={formData.directiva.presidenta_email} onChange={handleChange} className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  </div>
                 </div>
-
-                <div>
-                  <label htmlFor="directiva_secretaria" className="mb-1 block text-sm font-medium text-ink">
-                    Nombre de la Secretaria (opcional)
-                  </label>
-                  <input
-                    type="text"
-                    id="directiva_secretaria"
-                    name="directiva_secretaria"
-                    value={formData.directiva.secretaria}
-                    onChange={handleChange}
-                    className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <div>
+                    <label htmlFor="directiva_secretaria" className="mb-1 block text-sm font-medium text-ink">Nombre de la Secretaria (opcional)</label>
+                    <input type="text" id="directiva_secretaria" name="directiva_secretaria" value={formData.directiva.secretaria} onChange={handleChange} className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  </div>
+                  <div>
+                    <label htmlFor="directiva_secretaria_email" className="mb-1 block text-sm font-medium text-ink">Email Secretaria (opcional)</label>
+                    <input type="email" id="directiva_secretaria_email" name="directiva_secretaria_email" value={formData.directiva.secretaria_email} onChange={handleChange} className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -381,48 +397,36 @@ export default function Configuracion() {
 
           <div className="overflow-hidden rounded-2xl border border-muted/20 bg-surface p-4 shadow-sm sm:p-6">
             <h3 className="mb-4 font-semibold text-primary">Directiva</h3>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <div>
-                <label htmlFor="directiva_tesorera" className="mb-1 block text-sm font-medium text-ink">
-                  Tesorera *
-                </label>
-                <input
-                  type="text"
-                  id="directiva_tesorera"
-                  name="directiva_tesorera"
-                  value={formData.directiva.tesorera}
-                  onChange={handleChange}
-                  required
-                  className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <div>
+                  <label htmlFor="directiva_tesorera" className="mb-1 block text-sm font-medium text-ink">Tesorera *</label>
+                  <input type="text" id="directiva_tesorera" name="directiva_tesorera" value={formData.directiva.tesorera} onChange={handleChange} required className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <div>
+                  <label htmlFor="directiva_tesorera_email" className="mb-1 block text-sm font-medium text-ink">Email Tesorera (opcional)</label>
+                  <input type="email" id="directiva_tesorera_email" name="directiva_tesorera_email" value={formData.directiva.tesorera_email} onChange={handleChange} className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
               </div>
-
-              <div>
-                <label htmlFor="directiva_presidenta" className="mb-1 block text-sm font-medium text-ink">
-                  Presidenta (opcional)
-                </label>
-                <input
-                  type="text"
-                  id="directiva_presidenta"
-                  name="directiva_presidenta"
-                  value={formData.directiva.presidenta}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <div>
+                  <label htmlFor="directiva_presidenta" className="mb-1 block text-sm font-medium text-ink">Presidenta (opcional)</label>
+                  <input type="text" id="directiva_presidenta" name="directiva_presidenta" value={formData.directiva.presidenta} onChange={handleChange} className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <div>
+                  <label htmlFor="directiva_presidenta_email" className="mb-1 block text-sm font-medium text-ink">Email Presidenta (opcional)</label>
+                  <input type="email" id="directiva_presidenta_email" name="directiva_presidenta_email" value={formData.directiva.presidenta_email} onChange={handleChange} className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
               </div>
-
-              <div>
-                <label htmlFor="directiva_secretaria" className="mb-1 block text-sm font-medium text-ink">
-                  Secretaria (opcional)
-                </label>
-                <input
-                  type="text"
-                  id="directiva_secretaria"
-                  name="directiva_secretaria"
-                  value={formData.directiva.secretaria}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <div>
+                  <label htmlFor="directiva_secretaria" className="mb-1 block text-sm font-medium text-ink">Secretaria (opcional)</label>
+                  <input type="text" id="directiva_secretaria" name="directiva_secretaria" value={formData.directiva.secretaria} onChange={handleChange} className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <div>
+                  <label htmlFor="directiva_secretaria_email" className="mb-1 block text-sm font-medium text-ink">Email Secretaria (opcional)</label>
+                  <input type="email" id="directiva_secretaria_email" name="directiva_secretaria_email" value={formData.directiva.secretaria_email} onChange={handleChange} className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
               </div>
             </div>
           </div>
@@ -453,6 +457,43 @@ export default function Configuracion() {
             Resetear y comenzar de nuevo
           </button>
         </form>
+
+          {/* Sección Perfil */}
+        <div className="overflow-hidden rounded-2xl border border-muted/20 bg-surface p-4 shadow-sm sm:p-6">
+          <h3 className="mb-1 font-semibold text-primary">Mi Perfil</h3>
+          <p className="mb-4 text-sm text-muted">Actualiza tu nombre y correo de acceso</p>
+          <form onSubmit={handleActualizarPerfil} className="space-y-4 max-w-md">
+            <div>
+              <label htmlFor="perfil_nombre" className="mb-1 block text-sm font-medium text-ink">Nombre</label>
+              <input
+                type="text"
+                id="perfil_nombre"
+                value={formPerfil.nombre}
+                onChange={(e) => setFormPerfil((p) => ({ ...p, nombre: e.target.value }))}
+                required
+                className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <div>
+              <label htmlFor="perfil_email" className="mb-1 block text-sm font-medium text-ink">Correo electrónico</label>
+              <input
+                type="email"
+                id="perfil_email"
+                value={formPerfil.email}
+                onChange={(e) => setFormPerfil((p) => ({ ...p, email: e.target.value }))}
+                required
+                className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={guardandoPerfil}
+              className="h-12 rounded-xl bg-primary px-6 py-3 font-medium text-white shadow-md hover:bg-primary/90 disabled:opacity-50"
+            >
+              {guardandoPerfil ? "Guardando..." : "Guardar perfil"}
+            </button>
+          </form>
+        </div>
 
         {/* Sección Seguridad */}
         <div className="overflow-hidden rounded-2xl border border-muted/20 bg-surface p-4 shadow-sm sm:p-6">

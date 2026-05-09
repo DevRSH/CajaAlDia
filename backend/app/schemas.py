@@ -319,8 +319,11 @@ class NotificacionDeudaResponse(BaseModel):
 
 class Directiva(BaseModel):
     tesorera: str = Field(..., min_length=1, max_length=255)
+    tesorera_email: str | None = Field(None, max_length=255)
     presidenta: str | None = Field(None, max_length=255)
+    presidenta_email: str | None = Field(None, max_length=255)
     secretaria: str | None = Field(None, max_length=255)
+    secretaria_email: str | None = Field(None, max_length=255)
 
 
 class CursoCrear(BaseModel):
@@ -360,8 +363,11 @@ class CursoResponse(BaseModel):
     colegio: str
     año: int
     directiva_tesorera: str | None
+    directiva_tesorera_email: str | None
     directiva_presidenta: str | None
+    directiva_presidenta_email: str | None
     directiva_secretaria: str | None
+    directiva_secretaria_email: str | None
     created_at: datetime
 
     model_config = {"from_attributes": True}

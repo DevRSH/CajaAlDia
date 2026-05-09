@@ -155,6 +155,39 @@ def me(current_user: Usuario = Depends(get_current_user)):
     }
 
 
+@router.put("/perfil")
+def actualizar_perfil(
+    body: dict,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user),
+):
+    """Actualiza nombre y/o email del usuario autenticado."""
+    nombre = body.get("nombre", "").strip()
+    email = body.get("email", "").strip().lower()
+
+    if not nombre and not email:
+        raise HTTPException(status_code=400, detail="Debes proporcionar al menos nombre o email.")
+
+    if nombre:
+        current_user.nombre = nombre
+    if email:
+        # Verificar que el email no esté en uso por otro usuario
+        existente = db.execute(
+            select(Usuario).where(Usuario.email == email, Usuario.id != current_user.id)
+        ).scalar_one_or_none()
+        if existente is not None:
+            raise HTTPException(status_code=400, detail="Ese email ya está en uso por otro usuario.")
+        current_user.email = email
+
+    db.commit()
+    logger.info("Perfil actualizado: id=%s", current_user.id)
+    return {
+        "nombre": current_user.nombre,
+        "email": current_user.email,
+        "rol": current_user.rol,
+    }
+
+
 @router.post("/cambiar-password")
 def cambiar_password(
     body: dict,

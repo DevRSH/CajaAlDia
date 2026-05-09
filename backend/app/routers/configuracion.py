@@ -63,8 +63,11 @@ def crear_curso_configuracion(
             colegio=body.colegio.strip(),
             año=body.año,
             directiva_tesorera=body.directiva.tesorera.strip(),
+            directiva_tesorera_email=body.directiva.tesorera_email.strip() if body.directiva.tesorera_email else None,
             directiva_presidenta=body.directiva.presidenta.strip() if body.directiva.presidenta else None,
+            directiva_presidenta_email=body.directiva.presidenta_email.strip() if body.directiva.presidenta_email else None,
             directiva_secretaria=body.directiva.secretaria.strip() if body.directiva.secretaria else None,
+            directiva_secretaria_email=body.directiva.secretaria_email.strip() if body.directiva.secretaria_email else None,
         )
         db.add(curso)
         db.commit()
@@ -104,12 +107,11 @@ def actualizar_curso_configuracion(
             curso.año = body.año
         if body.directiva is not None:
             curso.directiva_tesorera = body.directiva.tesorera.strip()
-            curso.directiva_presidenta = (
-                body.directiva.presidenta.strip() if body.directiva.presidenta else None
-            )
-            curso.directiva_secretaria = (
-                body.directiva.secretaria.strip() if body.directiva.secretaria else None
-            )
+            curso.directiva_tesorera_email = body.directiva.tesorera_email.strip() if body.directiva.tesorera_email else None
+            curso.directiva_presidenta = body.directiva.presidenta.strip() if body.directiva.presidenta else None
+            curso.directiva_presidenta_email = body.directiva.presidenta_email.strip() if body.directiva.presidenta_email else None
+            curso.directiva_secretaria = body.directiva.secretaria.strip() if body.directiva.secretaria else None
+            curso.directiva_secretaria_email = body.directiva.secretaria_email.strip() if body.directiva.secretaria_email else None
 
         db.commit()
         db.refresh(curso)

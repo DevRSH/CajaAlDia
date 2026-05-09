@@ -84,6 +84,11 @@ export async function cambiarPassword(passwordActual, passwordNuevo) {
   return data;
 }
 
+export async function actualizarPerfil(nombre, email) {
+  const { data } = await api.put("/api/auth/perfil", { nombre, email });
+  return data;
+}
+
 export async function fetchEstadoPublico(codigoCurso) {
   const { data } = await api.get(`/api/public/${encodeURIComponent(codigoCurso)}`);
   return data;
