@@ -127,12 +127,12 @@ export default function Configuracion() {
 
   if (modo === "crear") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#E3F2FD] p-4">
-        <div className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-xl">
+      <div className="flex min-h-screen w-full max-w-full items-center justify-center overflow-x-hidden bg-[#E3F2FD] p-4">
+        <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl sm:p-8">
           <div className="mb-6 text-center">
             <img src={logoUrl} alt="CajaAlDía" className="mx-auto h-16 w-auto" />
-            <h1 className="mt-4 text-2xl font-bold text-primary">¡Bienvenida!</h1>
-            <h2 className="mt-2 text-xl font-semibold text-primary">Configura tu curso</h2>
+            <h1 className="mt-4 text-xl font-bold text-primary sm:text-2xl">¡Bienvenida!</h1>
+            <h2 className="mt-2 text-lg font-semibold text-primary sm:text-xl">Configura tu curso</h2>
             <p className="mt-2 text-muted">Solo necesitas unos minutos para comenzar</p>
           </div>
 
@@ -151,7 +151,7 @@ export default function Configuracion() {
                     value={formData.nombre}
                     onChange={handleChange}
                     required
-                    className="w-full rounded-lg border border-muted/30 px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                     placeholder="Ej: 4° Básico A"
                   />
                 </div>
@@ -167,7 +167,7 @@ export default function Configuracion() {
                     value={formData.codigo}
                     onChange={handleChange}
                     required
-                    className="w-full rounded-lg border border-muted/30 px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                     placeholder="Ej: 4BA-2026"
                   />
                   <p className="mt-1 text-xs text-muted">Este código se usa para el panel público</p>
@@ -184,7 +184,7 @@ export default function Configuracion() {
                     value={formData.colegio}
                     onChange={handleChange}
                     required
-                    className="w-full rounded-lg border border-muted/30 px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -201,7 +201,7 @@ export default function Configuracion() {
                     required
                     min="2000"
                     max="2100"
-                    className="w-full rounded-lg border border-muted/30 px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </div>
@@ -221,7 +221,7 @@ export default function Configuracion() {
                     value={formData.directiva.tesorera}
                     onChange={handleChange}
                     required
-                    className="w-full rounded-lg border border-muted/30 px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -235,7 +235,7 @@ export default function Configuracion() {
                     name="directiva_presidenta"
                     value={formData.directiva.presidenta}
                     onChange={handleChange}
-                    className="w-full rounded-lg border border-muted/30 px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
@@ -249,7 +249,7 @@ export default function Configuracion() {
                     name="directiva_secretaria"
                     value={formData.directiva.secretaria}
                     onChange={handleChange}
-                    className="w-full rounded-lg border border-muted/30 px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </div>
@@ -258,7 +258,7 @@ export default function Configuracion() {
             <button
               type="submit"
               disabled={guardando}
-              className="w-full rounded-xl bg-[#0D47A1] px-6 py-4 text-lg font-medium text-white shadow-lg hover:bg-[#0D47A1]/90 disabled:opacity-50"
+              className="h-14 w-full rounded-xl bg-[#0D47A1] px-6 py-3 text-lg font-medium text-white shadow-lg hover:bg-[#0D47A1]/90 disabled:opacity-50"
             >
               {guardando ? "Guardando..." : "Guardar configuración"}
             </button>
@@ -277,19 +277,19 @@ export default function Configuracion() {
 
   // Modo EDITAR
   return (
-    <div className="min-h-screen bg-bg pb-24">
-      <header className="border-b border-primary/15 bg-surface shadow-sm">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-bg pb-24">
+      <header className="min-h-[64px] border-b border-primary/15 bg-surface shadow-sm">
         <div className="mx-auto max-w-5xl px-4 py-4">
-          <h1 className="text-2xl font-bold text-primary">Configuración del Curso</h1>
+          <h1 className="text-xl font-bold text-primary sm:text-2xl">Configuración del Curso</h1>
           <p className="text-muted">Edita los datos de tu curso y directiva</p>
         </div>
       </header>
 
       <main className="mx-auto max-w-5xl space-y-6 px-4 py-6">
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="overflow-hidden rounded-2xl border border-muted/20 bg-surface p-6 shadow-sm">
+          <div className="overflow-hidden rounded-2xl border border-muted/20 bg-surface p-4 shadow-sm sm:p-6">
             <h3 className="mb-4 font-semibold text-primary">Datos del Curso</h3>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <label htmlFor="nombre" className="mb-1 block text-sm font-medium text-ink">
                   Nombre del curso *
@@ -301,7 +301,7 @@ export default function Configuracion() {
                   value={formData.nombre}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-lg border border-muted/30 px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
 
@@ -316,7 +316,7 @@ export default function Configuracion() {
                   value={formData.codigo}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-lg border border-muted/30 px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
                 <p className="mt-1 text-xs text-muted">Este código se usa para el panel público</p>
               </div>
@@ -332,7 +332,7 @@ export default function Configuracion() {
                   value={formData.colegio}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-lg border border-muted/30 px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
 
@@ -349,15 +349,15 @@ export default function Configuracion() {
                   required
                   min="2000"
                   max="2100"
-                  className="w-full rounded-lg border border-muted/30 px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-muted/20 bg-surface p-6 shadow-sm">
+          <div className="overflow-hidden rounded-2xl border border-muted/20 bg-surface p-4 shadow-sm sm:p-6">
             <h3 className="mb-4 font-semibold text-primary">Directiva</h3>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div>
                 <label htmlFor="directiva_tesorera" className="mb-1 block text-sm font-medium text-ink">
                   Tesorera *
@@ -369,7 +369,7 @@ export default function Configuracion() {
                   value={formData.directiva.tesorera}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-lg border border-muted/30 px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
 
@@ -383,7 +383,7 @@ export default function Configuracion() {
                   name="directiva_presidenta"
                   value={formData.directiva.presidenta}
                   onChange={handleChange}
-                  className="w-full rounded-lg border border-muted/30 px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
 
@@ -397,24 +397,25 @@ export default function Configuracion() {
                   name="directiva_secretaria"
                   value={formData.directiva.secretaria}
                   onChange={handleChange}
-                  className="w-full rounded-lg border border-muted/30 px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
             </div>
           </div>
 
-          <div className="flex gap-4">
+          {/* Botones responsive: full-width en mobile, auto en desktop */}
+          <div className="flex flex-col gap-3 sm:flex-row">
             <button
               type="submit"
               disabled={guardando}
-              className="rounded-xl bg-primary px-6 py-3 font-medium text-white shadow-lg hover:bg-primary/90 disabled:opacity-50"
+              className="h-12 rounded-xl bg-primary px-6 py-3 font-medium text-white shadow-lg hover:bg-primary/90 disabled:opacity-50"
             >
               {guardando ? "Guardando..." : "Guardar cambios"}
             </button>
             <button
               type="button"
               onClick={handleVolver}
-              className="rounded-xl border border-muted/30 px-6 py-3 font-medium text-ink hover:bg-bg"
+              className="h-12 rounded-xl border border-muted/30 px-6 py-3 font-medium text-ink hover:bg-bg"
             >
               Volver
             </button>
@@ -423,7 +424,7 @@ export default function Configuracion() {
           <button
             type="button"
             onClick={handleAbrirModalReset}
-            className="w-full rounded-xl border-2 border-danger px-6 py-3 font-medium text-danger hover:bg-danger/5"
+            className="h-12 w-full rounded-xl border-2 border-danger px-6 py-3 font-medium text-danger hover:bg-danger/5 sm:w-auto"
           >
             Resetear y comenzar de nuevo
           </button>
@@ -436,9 +437,10 @@ export default function Configuracion() {
           onClose={() => setToast((t) => ({ ...t, visible: false }))}
         />
 
+        {/* Modal resetear - full screen en mobile */}
         {modalReset && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl md:rounded-2xl">
+          <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-0 sm:items-center sm:p-4">
+            <div className="h-full w-full bg-surface p-4 shadow-xl sm:h-auto sm:max-w-md sm:rounded-2xl sm:p-6">
               <h3 className="mb-2 text-xl font-bold text-danger">¿Estás segura?</h3>
               <p className="mb-4 text-muted">Se eliminarán TODOS los datos del curso y no se podrán recuperar.</p>
               <div className="mb-4">
@@ -450,15 +452,15 @@ export default function Configuracion() {
                   id="confirmacion"
                   value={textoConfirmacion}
                   onChange={(e) => setTextoConfirmacion(e.target.value)}
-                  className="w-full rounded-lg border border-muted/30 px-4 py-2.5 focus:border-danger focus:outline-none focus:ring-2 focus:ring-danger/20"
+                  className="w-full rounded-lg border border-muted/30 px-4 py-3 text-base focus:border-danger focus:outline-none focus:ring-2 focus:ring-danger/20"
                   placeholder="RESETEAR"
                 />
               </div>
-              <div className="flex gap-3">
+              <div className="flex flex-col-reverse gap-3 sm:flex-row">
                 <button
                   type="button"
                   onClick={handleCerrarModalReset}
-                  className="flex-1 rounded-xl border border-muted/30 px-4 py-3 font-medium text-ink hover:bg-bg"
+                  className="h-12 flex-1 rounded-xl border border-muted/30 px-4 py-3 font-medium text-ink hover:bg-bg"
                 >
                   Cancelar
                 </button>
@@ -466,7 +468,7 @@ export default function Configuracion() {
                   type="button"
                   onClick={handleReset}
                   disabled={textoConfirmacion !== "RESETEAR" || guardando}
-                  className="flex-1 rounded-xl bg-danger px-4 py-3 font-medium text-white hover:bg-danger/90 disabled:opacity-50"
+                  className="h-12 flex-1 rounded-xl bg-danger px-4 py-3 font-medium text-white hover:bg-danger/90 disabled:opacity-50"
                 >
                   {guardando ? "Reseteando..." : "Confirmar"}
                 </button>

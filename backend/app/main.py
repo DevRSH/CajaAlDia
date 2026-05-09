@@ -17,7 +17,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from app.database import SessionLocal
-from app.models import Alumno, Apoderado, Curso
+from app.models import Alumno, Apoderado, ConfigCuota, Curso
 from app.routers import alumnos, configuracion, cuotas, movimientos, public, reportes
 from app.schemas import HealthResponse
 
@@ -167,6 +167,51 @@ def seed_alumnos_demo() -> None:
         db.close()
 
 
+def seed_cuota_especial_demo() -> None:
+    """Crea una cuota especial de demo 'Kermés Demo' para todos los alumnos."""
+    db = SessionLocal()
+    try:
+        # Verificar si ya existe cuota especial de demo
+        existente = db.execute(
+            select(ConfigCuota).where(
+                ConfigCuota.curso_id == CURSO_DEMO_ID,
+                ConfigCuota.tipo == "especial",
+                ConfigCuota.nombre_especial == "Kermés Demo",
+            )
+        ).scalar_one_or_none()
+        if existente:
+            return
+
+        # Verificar que exista el curso demo
+        curso = db.execute(select(Curso).where(Curso.id == CURSO_DEMO_ID)).scalar_one_or_none()
+        if curso is None:
+            return
+
+        # Crear cuota especial demo
+        import uuid
+        config = ConfigCuota(
+            id=str(uuid.uuid4()),
+            curso_id=CURSO_DEMO_ID,
+            año=2026,
+            mes=0,  # 0 para cuotas especiales
+            monto=3000,
+            descripcion="Cuota especial para la Kermés de demostración",
+            tipo="especial",
+            nombre_especial="Kermés Demo",
+        )
+        db.add(config)
+        db.commit()
+        logger.info("Seed cuota especial demo: 'Kermés Demo' de $3.000 creada exitosamente.")
+    except IntegrityError:
+        db.rollback()
+        logger.warning("Seed cuota especial demo: ya existe, se omite.")
+    except Exception as e:
+        db.rollback()
+        logger.exception("Seed cuota especial demo falló: %s", e)
+    finally:
+        db.close()
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     """Arranque: verificar si existe curso. Si no, la app muestra pantalla de configuración."""
@@ -175,6 +220,7 @@ async def lifespan(_app: FastAPI):
     if os.getenv("CURSO_DEMO", "false").lower() == "true":
         seed_curso_demo()
         seed_alumnos_demo()
+        seed_cuota_especial_demo()
     yield
 
 

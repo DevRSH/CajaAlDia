@@ -37,42 +37,49 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Hamburger button mobile */}
+      {/* Hamburger button mobile - 48px mínimo para touch */}
       <button
         type="button"
         onClick={() => setAbierto(true)}
-        className="fixed left-4 top-4 z-50 rounded-lg bg-primary p-2 text-white shadow-lg md:hidden"
+        className="fixed left-4 top-4 z-50 flex h-12 w-12 items-center justify-center rounded-lg bg-primary p-2 text-white shadow-lg md:hidden"
+        aria-label="Abrir menú"
       >
         <Menu size={24} />
       </button>
 
-      {/* Overlay mobile */}
-      {abierto && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 md:hidden"
-          onClick={() => setAbierto(false)}
-        />
-      )}
+      {/* Overlay mobile con transición suave */}
+      <div
+        className={`fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 md:hidden ${
+          abierto ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+        onClick={() => setAbierto(false)}
+      />
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 z-40 h-full w-64 border-r border-primary/15 bg-surface shadow-lg transition-transform duration-300 md:translate-x-0 ${
+        className={`fixed left-0 top-0 z-50 h-full w-64 border-r border-primary/15 bg-surface shadow-xl transition-transform duration-300 ease-out md:translate-x-0 ${
           abierto ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex h-full flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between border-b border-muted/20 px-4 py-4">
+          {/* Header - altura mínima 64px en mobile */}
+          <div className="flex h-16 items-center justify-between border-b border-muted/20 px-4">
             <div className="flex items-center gap-3">
               <img src={logoUrl} alt="CajaAlDía" className="h-10 w-auto" />
-              <span className="font-bold text-primary">CajaAlDía</span>
+              <div className="flex flex-col">
+                <span className="font-bold text-primary">CajaAlDía</span>
+                {curso && (
+                  <span className="text-xs text-muted line-clamp-1">{curso.nombre}</span>
+                )}
+              </div>
             </div>
             <button
               type="button"
               onClick={() => setAbierto(false)}
-              className="rounded-lg p-1 text-muted hover:bg-bg md:hidden"
+              className="flex h-10 w-10 items-center justify-center rounded-lg text-muted hover:bg-bg md:hidden"
+              aria-label="Cerrar menú"
             >
-              <X size={20} />
+              <X size={24} />
             </button>
           </div>
 
@@ -85,13 +92,13 @@ export default function Sidebar() {
                   key={item.path}
                   to={item.path}
                   onClick={() => setAbierto(false)}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                  className={`flex min-h-[48px] items-center gap-3 rounded-lg px-3 py-3 text-base font-medium transition-colors ${
                     activo(item.path)
                       ? "bg-primary/10 text-primary"
                       : "text-muted hover:bg-bg hover:text-ink"
                   }`}
                 >
-                  <Icon size={20} />
+                  <Icon size={22} />
                   {item.label}
                 </Link>
               );

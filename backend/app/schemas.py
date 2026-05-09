@@ -153,9 +153,33 @@ class AlumnoActualizar(BaseModel):
 class ConfigCuotaCrear(BaseModel):
     curso_id: str = Field(..., min_length=1)
     anio: int = Field(..., ge=2000, le=2100)
-    mes: int = Field(..., ge=1, le=12)
+    mes: int | None = Field(None, ge=0, le=12)  # 0 o null para especiales
     monto: int = Field(..., gt=0)
     descripcion: str = Field(..., min_length=1, max_length=200)
+    tipo: Literal["curso", "especial"] = "curso"
+    nombre_especial: str | None = Field(None, max_length=200)  # Requerido si tipo="especial"
+    alumno_ids: list[str] | None = None  # null = aplica a todos, lista = aplica solo a esos alumnos
+
+    @field_validator("nombre_especial")
+    @classmethod
+    def validar_nombre_especial(cls, v: str | None, info) -> str | None:
+        tipo = info.data.get("tipo")
+        if tipo == "especial" and not v:
+            raise ValueError("El nombre_especial es obligatorio para cuotas especiales")
+        if tipo == "curso" and v:
+            raise ValueError("El nombre_especial no debe usarse para cuotas de curso")
+        return v
+
+    @field_validator("mes")
+    @classmethod
+    def validar_mes(cls, v: int | None, info) -> int:
+        tipo = info.data.get("tipo")
+        if tipo == "curso" and (v is None or v < 1):
+            raise ValueError("El mes es obligatorio (1-12) para cuotas de curso")
+        # Para especiales, usar mes=0 si no viene
+        if tipo == "especial" and v is None:
+            return 0
+        return v if v is not None else 0
 
 
 class ConfigCuotaResponse(BaseModel):
@@ -165,6 +189,26 @@ class ConfigCuotaResponse(BaseModel):
     mes: int
     monto: int
     descripcion: str
+    tipo: str = "curso"
+    nombre_especial: str | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class ConfigCuotasListResponse(BaseModel):
+    """Respuesta separada para cuotas de curso y cuotas especiales."""
+
+    cuotas_curso: list[ConfigCuotaResponse]
+    cuotas_especiales: list[ConfigCuotaResponse]
+
+
+class CuotaEspecialAlumnoResponse(BaseModel):
+    """Alumno asociado a una cuota especial."""
+
+    id: str
+    config_cuota_id: str
+    alumno_id: str
+    created_at: datetime
 
     model_config = {"from_attributes": True}
 
@@ -206,6 +250,33 @@ class CuotaEstadoResponse(BaseModel):
     curso: dict
     año: int
     alumnos: list[AlumnoEstadoCuota]
+    cuotas_especiales: list[dict] | None = None  # Agregado para incluir estado de cuotas especiales
+
+
+class CuotaEspecialEstado(BaseModel):
+    """Estado de una cuota especial para un alumno."""
+
+    config_cuota_id: str
+    nombre_especial: str
+    monto: int
+    pagado: bool
+    fecha_pago: date | None = None
+    folio: str | None = None
+
+
+class AlumnoEstadoCuotaConEspeciales(AlumnoEstadoCuota):
+    """Extensión con cuotas especiales."""
+
+    cuotas_especiales: list[CuotaEspecialEstado] = []
+
+
+class CuotaEstadoCompletoResponse(BaseModel):
+    """Respuesta completa incluyendo cuotas especiales."""
+
+    curso: dict
+    año: int
+    alumnos: list[AlumnoEstadoCuotaConEspeciales]
+    cuotas_especiales: list[ConfigCuotaResponse]
 
 
 class PagoCuotaConMovimiento(BaseModel):

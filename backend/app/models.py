@@ -105,17 +105,49 @@ class Apoderado(Base):
 class ConfigCuota(Base):
     __tablename__ = "config_cuotas"
 
-    __table_args__ = (UniqueConstraint("curso_id", "año", "mes", name="uq_config_cuotas_curso_año_mes"),)
+    # Unique constraint diferente para cuotas curso vs especiales
+    __table_args__ = (
+        UniqueConstraint("curso_id", "año", "mes", name="uq_config_cuotas_curso_año_mes"),
+    )
 
     id: Mapped[str] = mapped_column(CHAR(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     curso_id: Mapped[str] = mapped_column(CHAR(36), ForeignKey("cursos.id", ondelete="CASCADE"), nullable=False)
     año: Mapped[int] = mapped_column(Integer, nullable=False)
-    mes: Mapped[int] = mapped_column(Integer, nullable=False)  # 1-12
+    mes: Mapped[int] = mapped_column(Integer, nullable=False, default=0)  # 0 para especiales, 1-12 para curso
     monto: Mapped[int] = mapped_column(Integer, nullable=False)
     descripcion: Mapped[str] = mapped_column(String(200), nullable=False)
+    tipo: Mapped[str] = mapped_column(String(20), nullable=False, default="curso")  # "curso" | "especial"
+    nombre_especial: Mapped[str | None] = mapped_column(String(200), nullable=True)  # Solo para tipo="especial"
 
     curso: Mapped["Curso"] = relationship()
     pagos: Mapped[list["PagoCuota"]] = relationship(back_populates="config_cuota")
+    alumnos_especiales: Mapped[list["CuotaEspecialAlumno"]] = relationship(
+        back_populates="config_cuota",
+        cascade="all, delete-orphan",
+    )
+
+
+class CuotaEspecialAlumno(Base):
+    """Tabla pivot para cuotas especiales: si no hay filas para una ConfigCuota,
+    significa que aplica a TODOS los alumnos."""
+
+    __tablename__ = "cuota_especial_alumnos"
+
+    __table_args__ = (
+        UniqueConstraint("config_cuota_id", "alumno_id", name="uq_cuota_especial_alumno"),
+    )
+
+    id: Mapped[str] = mapped_column(CHAR(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    config_cuota_id: Mapped[str] = mapped_column(
+        CHAR(36), ForeignKey("config_cuotas.id", ondelete="CASCADE"), nullable=False
+    )
+    alumno_id: Mapped[str] = mapped_column(
+        CHAR(36), ForeignKey("alumnos.id", ondelete="CASCADE"), nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.utcnow())
+
+    config_cuota: Mapped["ConfigCuota"] = relationship(back_populates="alumnos_especiales")
+    alumno: Mapped["Alumno"] = relationship()
 
 
 class PagoCuota(Base):

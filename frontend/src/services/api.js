@@ -92,6 +92,26 @@ export async function crearConfigCuota(payload) {
   return data;
 }
 
+export async function crearCuotaEspecial(data) {
+  // Wrapper para crear cuota especial con tipo="especial"
+  return crearConfigCuota({
+    ...data,
+    tipo: "especial",
+    mes: 0, // Cuotas especiales usan mes=0
+  });
+}
+
+export async function fetchCuotasEspeciales(cursoId, anio) {
+  const response = await fetchConfigCuotas(cursoId, anio);
+  // La API retorna { cuotas_curso, cuotas_especiales }
+  return response?.cuotas_especiales || [];
+}
+
+export async function fetchEstadoCuotaEspecial(configCuotaId) {
+  const { data } = await api.get(`/api/cuotas/especial/${configCuotaId}/estado`);
+  return data;
+}
+
 export async function registrarPagoCuota(payload) {
   const response = await api.post("/api/cuotas/pago", payload);
   return response.data;

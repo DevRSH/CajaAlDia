@@ -110,15 +110,17 @@ export default function NuevoMovimiento({ abierto, onCerrar, onExitoGlobal }) {
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4">
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface p-6 shadow-xl md:rounded-2xl">
+    /* Modal full-screen en mobile, centrado en desktop */
+    <div className="fixed inset-0 z-40 flex items-start justify-center bg-black/40 p-0 sm:items-center sm:p-4">
+      <div className="h-full w-full overflow-y-auto bg-surface p-4 shadow-xl sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-2xl sm:p-6">
         {!creado ? (
           <form onSubmit={guardar} className="space-y-4">
             <h2 className="text-xl font-bold text-primary">Nuevo movimiento</h2>
 
+            {/* Grid de selección de tipo - full width en mobile */}
             <div className="grid grid-cols-2 gap-3">
               <label
-                className={`flex cursor-pointer items-center justify-center rounded-xl border-2 p-4 text-center font-semibold ${
+                className={`flex h-14 cursor-pointer items-center justify-center rounded-xl border-2 p-4 text-center font-semibold ${
                   tipo === "ingreso"
                     ? "border-success bg-green-50 text-success"
                     : "border-muted/30 hover:border-success/50"
@@ -134,7 +136,7 @@ export default function NuevoMovimiento({ abierto, onCerrar, onExitoGlobal }) {
                 INGRESO
               </label>
               <label
-                className={`flex cursor-pointer items-center justify-center rounded-xl border-2 p-4 text-center font-semibold ${
+                className={`flex h-14 cursor-pointer items-center justify-center rounded-xl border-2 p-4 text-center font-semibold ${
                   tipo === "egreso" ? "border-danger bg-red-50 text-danger" : "border-muted/30 hover:border-danger/50"
                 }`}
               >
@@ -150,14 +152,14 @@ export default function NuevoMovimiento({ abierto, onCerrar, onExitoGlobal }) {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-semibold text-muted">Monto (CLP)</label>
+              <label className="mb-1 block text-sm font-medium text-muted">Monto (CLP)</label>
               <input
                 type="text"
                 inputMode="numeric"
                 placeholder="Ej: 25000"
                 value={montoStr}
                 onChange={onMontoChange}
-                className="w-full rounded-lg border border-muted/40 px-3 py-3 text-lg outline-none ring-primary focus:ring-2"
+                className="w-full rounded-lg border border-muted/40 px-3 py-3 text-base outline-none ring-primary focus:ring-2"
               />
               <p className="mt-1 text-sm text-muted">
                 Vista previa:{" "}
@@ -167,7 +169,7 @@ export default function NuevoMovimiento({ abierto, onCerrar, onExitoGlobal }) {
 
             <div>
               <div className="mb-1 flex justify-between">
-                <label className="text-sm font-semibold text-muted">Descripción</label>
+                <label className="text-sm font-medium text-muted">Descripción</label>
                 <span className="text-xs text-muted">{restantes}</span>
               </div>
               <textarea
@@ -175,24 +177,25 @@ export default function NuevoMovimiento({ abierto, onCerrar, onExitoGlobal }) {
                 rows={3}
                 value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
-                className="w-full rounded-lg border border-muted/40 px-3 py-2 outline-none ring-primary focus:ring-2"
+                className="w-full rounded-lg border border-muted/40 px-3 py-3 text-base outline-none ring-primary focus:ring-2"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-semibold text-muted">Fecha</label>
+              <label className="mb-1 block text-sm font-medium text-muted">Fecha</label>
               <input
                 type="date"
                 value={fecha}
                 onChange={(e) => setFecha(e.target.value)}
-                className="w-full rounded-lg border border-muted/40 px-3 py-2 outline-none ring-primary focus:ring-2"
+                className="w-full rounded-lg border border-muted/40 px-3 py-3 text-base outline-none ring-primary focus:ring-2"
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            {/* Botones full-width en mobile */}
+            <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
               <button
                 type="button"
-                className="rounded-lg px-4 py-3 font-medium text-muted hover:bg-bg"
+                className="h-12 rounded-lg px-4 py-3 font-medium text-muted hover:bg-bg"
                 onClick={onCerrar}
               >
                 Cancelar
@@ -200,28 +203,29 @@ export default function NuevoMovimiento({ abierto, onCerrar, onExitoGlobal }) {
               <button
                 type="submit"
                 disabled={cargando}
-                className="rounded-lg bg-primary px-5 py-3 font-medium text-white shadow hover:bg-primary/90 disabled:opacity-60"
+                className="h-12 rounded-lg bg-primary px-5 py-3 font-medium text-white shadow hover:bg-primary/90 disabled:opacity-60"
               >
                 {cargando ? "Guardando..." : "Guardar"}
               </button>
             </div>
           </form>
         ) : (
-          <div className="space-y-4">
+          <div className="flex h-full flex-col justify-center space-y-4 sm:h-auto">
             <h2 className="text-xl font-bold text-success">¡Movimiento guardado!</h2>
             <p className="text-sm text-muted">Folio generado:</p>
             <FolioTag folio={creado.folio} />
-            <div className="flex flex-wrap gap-2 pt-2">
+            {/* Botones full-width en mobile */}
+            <div className="flex flex-col gap-2 pt-2 sm:flex-row">
               <button
                 type="button"
-                className="rounded-lg bg-primary px-4 py-3 font-medium text-white"
+                className="h-12 rounded-lg bg-primary px-4 py-3 font-medium text-white"
                 onClick={() => navigate(`/comprobante/${creado.id}`)}
               >
                 Ver comprobante
               </button>
               <button
                 type="button"
-                className="rounded-lg border border-muted/40 px-4 py-3 font-medium text-ink"
+                className="h-12 rounded-lg border border-muted/40 px-4 py-3 font-medium text-ink"
                 onClick={onCerrar}
               >
                 Volver al dashboard

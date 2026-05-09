@@ -232,17 +232,18 @@ export default function Alumnos() {
   }
 
   return (
-    <div className="min-h-screen pb-24">
-      <header className="border-b border-primary/15 bg-surface shadow-sm">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <div>
-            <h1 className="text-2xl font-bold text-primary">Alumnos</h1>
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden pb-24">
+      {/* Header mobile-first */}
+      <header className="min-h-[64px] border-b border-primary/15 bg-surface shadow-sm">
+        <div className="mx-auto flex max-w-5xl flex-col items-start justify-between gap-3 px-4 py-4 sm:flex-row sm:items-center">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl font-bold text-primary sm:text-2xl">Alumnos</h1>
             <p className="text-sm text-muted">Gestión de alumnos y apoderados</p>
           </div>
           <button
             type="button"
             onClick={() => setModal(true)}
-            className="rounded-xl bg-primary px-4 py-3 text-sm font-medium text-white shadow hover:bg-primary/90"
+            className="h-12 w-full rounded-xl bg-primary px-4 py-3 text-base font-medium text-white shadow hover:bg-primary/90 active:bg-primary/80 sm:w-auto"
           >
             + Agregar alumno
           </button>
@@ -251,6 +252,7 @@ export default function Alumnos() {
 
       <main className="mx-auto max-w-5xl px-4 py-6">
         <section className="overflow-hidden rounded-2xl border border-muted/20 bg-surface shadow-sm">
+          {/* Tabla scrollable horizontalmente */}
           <div className="overflow-x-auto">
             <table className="w-full min-w-[800px] text-left text-sm">
               <thead className="bg-bg text-muted">
@@ -284,16 +286,18 @@ export default function Alumnos() {
                       <td className="px-4 py-3">{estadoBadge(a.estado_cuota)}</td>
                       <td className="px-4 py-3">
                         <div className="flex gap-2">
+                          {/* Botones de acción con tamaño mínimo 40px para touch */}
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               abrirEdicion(a);
                             }}
-                            className="rounded p-1 text-muted hover:bg-bg hover:text-primary"
+                            className="flex h-10 w-10 items-center justify-center rounded p-1 text-muted hover:bg-bg hover:text-primary"
                             title="Editar"
+                            aria-label="Editar alumno"
                           >
-                            <Edit size={16} />
+                            <Edit size={18} />
                           </button>
                           <button
                             type="button"
@@ -301,10 +305,11 @@ export default function Alumnos() {
                               e.stopPropagation();
                               abrirEliminar(a);
                             }}
-                            className="rounded p-1 text-muted hover:bg-bg hover:text-danger"
+                            className="flex h-10 w-10 items-center justify-center rounded p-1 text-muted hover:bg-bg hover:text-danger"
                             title="Eliminar"
+                            aria-label="Eliminar alumno"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={18} />
                           </button>
                         </div>
                       </td>
@@ -317,98 +322,106 @@ export default function Alumnos() {
         </section>
       </main>
 
-      {/* Modal nuevo alumno */}
+      {/* Modal nuevo alumno - full screen en mobile, centrado en desktop */}
       {modal && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface p-6 shadow-xl md:rounded-2xl">
+        <div className="fixed inset-0 z-40 flex items-start justify-center bg-black/40 p-0 sm:items-center sm:p-4">
+          <div className="h-full w-full overflow-y-auto bg-surface p-4 shadow-xl sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-2xl sm:p-6">
             <h2 className="mb-4 text-xl font-bold text-primary">Nuevo alumno</h2>
             <form onSubmit={guardar} className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-semibold text-muted">Nombre</label>
+                <label className="mb-1 block text-sm font-medium text-muted">Nombre</label>
                 <input
                   type="text"
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
-                  className="w-full rounded-lg border border-muted/40 px-3 py-2 outline-none ring-primary focus:ring-2"
+                  className="w-full rounded-lg border border-muted/40 px-3 py-3 text-base outline-none ring-primary focus:ring-2"
+                  placeholder="Nombre del alumno"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-sm font-semibold text-muted">Apellido paterno</label>
+                  <label className="mb-1 block text-sm font-medium text-muted">Apellido paterno</label>
                   <input
                     type="text"
                     value={apellidoPaterno}
                     onChange={(e) => setApellidoPaterno(e.target.value)}
-                    className="w-full rounded-lg border border-muted/40 px-3 py-2 outline-none ring-primary focus:ring-2"
+                    className="w-full rounded-lg border border-muted/40 px-3 py-3 text-base outline-none ring-primary focus:ring-2"
+                    placeholder="Apellido paterno"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-semibold text-muted">Apellido materno</label>
+                  <label className="mb-1 block text-sm font-medium text-muted">Apellido materno</label>
                   <input
                     type="text"
                     value={apellidoMaterno}
                     onChange={(e) => setApellidoMaterno(e.target.value)}
-                    className="w-full rounded-lg border border-muted/40 px-3 py-2 outline-none ring-primary focus:ring-2"
+                    className="w-full rounded-lg border border-muted/40 px-3 py-3 text-base outline-none ring-primary focus:ring-2"
+                    placeholder="Apellido materno (opcional)"
                   />
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-semibold text-muted">RUT (opcional)</label>
+                <label className="mb-1 block text-sm font-medium text-muted">RUT (opcional)</label>
                 <input
                   type="text"
                   placeholder="XX.XXX.XXX-X"
                   value={rut}
                   onChange={(e) => setRut(e.target.value)}
-                  className="w-full rounded-lg border border-muted/40 px-3 py-2 outline-none ring-primary focus:ring-2"
+                  className="w-full rounded-lg border border-muted/40 px-3 py-3 text-base outline-none ring-primary focus:ring-2"
                 />
               </div>
               <div className="border-t border-muted/20 pt-4">
                 <h3 className="mb-3 font-semibold text-primary">Apoderado</h3>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
-                    <label className="mb-1 block text-sm font-semibold text-muted">Nombre</label>
+                    <label className="mb-1 block text-sm font-medium text-muted">Nombre</label>
                     <input
                       type="text"
                       value={apodNombre}
                       onChange={(e) => setApodNombre(e.target.value)}
-                      className="w-full rounded-lg border border-muted/40 px-3 py-2 outline-none ring-primary focus:ring-2"
+                      className="w-full rounded-lg border border-muted/40 px-3 py-3 text-base outline-none ring-primary focus:ring-2"
+                      placeholder="Nombre del apoderado"
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm font-semibold text-muted">Apellido paterno</label>
+                    <label className="mb-1 block text-sm font-medium text-muted">Apellido paterno</label>
                     <input
                       type="text"
                       value={apodApellido}
                       onChange={(e) => setApodApellido(e.target.value)}
-                      className="w-full rounded-lg border border-muted/40 px-3 py-2 outline-none ring-primary focus:ring-2"
+                      className="w-full rounded-lg border border-muted/40 px-3 py-3 text-base outline-none ring-primary focus:ring-2"
+                      placeholder="Apellido del apoderado"
                     />
                   </div>
                 </div>
-                <div className="mt-3 grid grid-cols-2 gap-3">
+                <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
-                    <label className="mb-1 block text-sm font-semibold text-muted">Email (opcional)</label>
+                    <label className="mb-1 block text-sm font-medium text-muted">Email (opcional)</label>
                     <input
                       type="email"
                       value={apodEmail}
                       onChange={(e) => setApodEmail(e.target.value)}
-                      className="w-full rounded-lg border border-muted/40 px-3 py-2 outline-none ring-primary focus:ring-2"
+                      className="w-full rounded-lg border border-muted/40 px-3 py-3 text-base outline-none ring-primary focus:ring-2"
+                      placeholder="email@ejemplo.com"
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm font-semibold text-muted">Teléfono (opcional)</label>
+                    <label className="mb-1 block text-sm font-medium text-muted">Teléfono (opcional)</label>
                     <input
-                      type="text"
+                      type="tel"
                       value={apodTelefono}
                       onChange={(e) => setApodTelefono(e.target.value)}
-                      className="w-full rounded-lg border border-muted/40 px-3 py-2 outline-none ring-primary focus:ring-2"
+                      className="w-full rounded-lg border border-muted/40 px-3 py-3 text-base outline-none ring-primary focus:ring-2"
+                      placeholder="+569XXXXXXXX"
                     />
                   </div>
                 </div>
               </div>
-              <div className="flex justify-end gap-2 pt-2">
+              {/* Botones full-width en mobile */}
+              <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
                 <button
                   type="button"
-                  className="rounded-lg px-4 py-3 font-medium text-muted hover:bg-bg"
+                  className="h-12 rounded-lg px-4 py-3 font-medium text-muted hover:bg-bg"
                   onClick={cerrarModal}
                 >
                   Cancelar
@@ -416,7 +429,7 @@ export default function Alumnos() {
                 <button
                   type="submit"
                   disabled={cargando}
-                  className="rounded-lg bg-primary px-5 py-3 font-medium text-white shadow hover:bg-primary/90 disabled:opacity-60"
+                  className="h-12 rounded-lg bg-primary px-5 py-3 font-medium text-white shadow hover:bg-primary/90 disabled:opacity-60"
                 >
                   {cargando ? "Guardando..." : "Guardar"}
                 </button>
@@ -426,11 +439,11 @@ export default function Alumnos() {
         </div>
       )}
 
-      {/* Modal detalle alumno */}
+      {/* Modal detalle alumno - full screen en mobile */}
       {modalDetalle && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface p-6 shadow-xl md:rounded-2xl">
-            <h2 className="mb-4 text-xl font-bold text-primary">{nombreCompleto(modalDetalle)}</h2>
+        <div className="fixed inset-0 z-40 flex items-start justify-center bg-black/40 p-0 sm:items-center sm:p-4">
+          <div className="h-full w-full overflow-y-auto bg-surface p-4 shadow-xl sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-2xl sm:p-6">
+            <h2 className="mb-4 text-lg font-bold text-primary sm:text-xl">{nombreCompleto(modalDetalle)}</h2>
             <div className="space-y-3 text-sm">
               <div>
                 <span className="font-semibold text-muted">RUT:</span> {modalDetalle.rut || "-"}
@@ -457,7 +470,7 @@ export default function Alumnos() {
             <div className="mt-6 flex justify-end">
               <button
                 type="button"
-                className="rounded-lg border border-muted/40 px-4 py-3 font-medium text-ink"
+                className="h-12 w-full rounded-lg border border-muted/40 px-4 py-3 font-medium text-ink sm:w-auto"
                 onClick={() => setModalDetalle(null)}
               >
                 Cerrar
@@ -467,10 +480,10 @@ export default function Alumnos() {
         </div>
       )}
 
-      {/* Modal edición alumno */}
+      {/* Modal edición alumno - full screen en mobile */}
       {modalEdicion && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface p-6 shadow-xl md:rounded-2xl">
+        <div className="fixed inset-0 z-40 flex items-start justify-center bg-black/40 p-0 sm:items-center sm:p-4">
+          <div className="h-full w-full overflow-y-auto bg-surface p-4 shadow-xl sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-2xl sm:p-6">
             <h2 className="mb-4 text-xl font-bold text-primary">Editar alumno</h2>
             <form onSubmit={guardarEdicion} className="space-y-4">
               <div>
@@ -555,10 +568,11 @@ export default function Alumnos() {
                   </div>
                 </div>
               </div>
-              <div className="flex justify-end gap-2 pt-2">
+              {/* Botones full-width en mobile */}
+              <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
                 <button
                   type="button"
-                  className="rounded-lg px-4 py-3 font-medium text-muted hover:bg-bg"
+                  className="h-12 rounded-lg px-4 py-3 font-medium text-muted hover:bg-bg"
                   onClick={cerrarEdicion}
                 >
                   Cancelar
@@ -566,7 +580,7 @@ export default function Alumnos() {
                 <button
                   type="submit"
                   disabled={cargando}
-                  className="rounded-lg bg-primary px-5 py-3 font-medium text-white shadow hover:bg-primary/90 disabled:opacity-60"
+                  className="h-12 rounded-lg bg-primary px-5 py-3 font-medium text-white shadow hover:bg-primary/90 disabled:opacity-60"
                 >
                   {cargando ? "Guardando..." : "Guardar cambios"}
                 </button>
@@ -576,18 +590,18 @@ export default function Alumnos() {
         </div>
       )}
 
-      {/* Modal confirmar eliminación */}
+      {/* Modal confirmar eliminación - full screen en mobile */}
       {modalEliminar && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-w-md w-full rounded-2xl bg-surface p-6 shadow-xl md:rounded-2xl">
+        <div className="fixed inset-0 z-40 flex items-start justify-center bg-black/40 p-0 sm:items-center sm:p-4">
+          <div className="h-full w-full bg-surface p-4 shadow-xl sm:h-auto sm:max-w-md sm:rounded-2xl sm:p-6">
             <h2 className="mb-4 text-xl font-bold text-primary">Eliminar alumno</h2>
-            <p className="mb-6 text-sm">
-              ¿Eliminar a {nombreCompleto(alumnoEliminar)}? Esta acción no se puede deshacer.
+            <p className="mb-6 text-base">
+              ¿Eliminar a <strong>{nombreCompleto(alumnoEliminar)}</strong>? Esta acción no se puede deshacer.
             </p>
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button
                 type="button"
-                className="rounded-lg px-4 py-3 font-medium text-muted hover:bg-bg"
+                className="h-12 rounded-lg px-4 py-3 font-medium text-muted hover:bg-bg"
                 onClick={() => {
                   setModalEliminar(false);
                   setAlumnoEliminar(null);
@@ -599,7 +613,7 @@ export default function Alumnos() {
                 type="button"
                 disabled={cargando}
                 onClick={confirmarEliminar}
-                className="rounded-lg bg-danger px-5 py-3 font-medium text-white shadow hover:bg-danger/90 disabled:opacity-60"
+                className="h-12 rounded-lg bg-danger px-5 py-3 font-medium text-white shadow hover:bg-danger/90 disabled:opacity-60"
               >
                 {cargando ? "Eliminando..." : "Eliminar"}
               </button>

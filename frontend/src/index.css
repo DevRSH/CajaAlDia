@@ -14,6 +14,12 @@
   --color-surface: #ffffff;
 }
 
+/* Mobile-first: prevenir zoom en iOS y tamaños mínimos */
+html {
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
   font-family: Inter, system-ui, sans-serif;
@@ -21,6 +27,9 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text);
   min-height: 100vh;
+  /* Prevenir scroll horizontal */
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 h1,
@@ -29,6 +38,39 @@ h3 {
   font-family: Inter, system-ui, sans-serif;
   font-weight: 700;
   color: var(--color-text);
+}
+
+/* Mobile-first: inputs con text-base para evitar zoom en iOS */
+input,
+select,
+textarea {
+  font-size: 16px;
+  min-height: 48px;
+}
+
+/* Mobile-first: botones mínimo 48px de alto para touch */
+button,
+[role="button"] {
+  min-height: 48px;
+}
+
+/* Scrollbar styling para tablas */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
 }
 
 @media print {

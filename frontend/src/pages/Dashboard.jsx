@@ -57,76 +57,81 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen pb-24">
-      <header className="border-b border-primary/15 bg-surface shadow-sm">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-4 px-4 py-4">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden pb-24">
+      {/* Header mobile-first: altura mínima 64px, padding consistente */}
+      <header className="min-h-[64px] border-b border-primary/15 bg-surface shadow-sm">
+        <div className="mx-auto flex max-w-5xl flex-col items-start gap-2 px-4 py-4 sm:flex-row sm:items-center sm:gap-4">
           <img src={logoUrl} alt="CajaAlDía" className="h-12 w-auto" />
-          <div>
-            <h1 className="text-2xl font-bold text-primary">CajaAlDía</h1>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl font-bold text-primary sm:text-2xl">CajaAlDía</h1>
             <p className="text-sm text-muted">La plata del curso, siempre a la vista.</p>
-            <p className="mt-1 font-semibold text-ink">{curso?.nombre ?? "…"}</p>
+            <p className="mt-1 truncate font-semibold text-ink">{curso?.nombre ?? "…"}</p>
           </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-5xl space-y-6 px-4 py-6">
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-          <section className="sm:col-span-3 lg:col-span-1 lg:row-span-2">
-            <div className="rounded-2xl border-2 border-primary bg-surface p-6 shadow-md">
+        {/* Grid responsive: 1 columna en mobile, 3 en sm+ */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Tarjeta de saldo: full width en mobile */}
+          <section className="col-span-1 sm:col-span-2 lg:col-span-1 lg:row-span-2">
+            <div className="rounded-2xl border-2 border-primary bg-surface p-5 shadow-md sm:p-6">
               <h2 className="font-semibold text-muted">Saldo disponible</h2>
-              <div className="mt-4 text-4xl font-bold text-primary">
+              <div className="mt-4 text-3xl font-bold text-primary sm:text-4xl">
                 <MontoDisplay monto={estado?.saldo ?? 0} tipo="neutro" className="!text-current" />
               </div>
             </div>
           </section>
 
           <section>
-            <div className="rounded-2xl border border-success/30 bg-green-50 p-5 shadow">
+            <div className="rounded-2xl border border-success/30 bg-green-50 p-4 shadow sm:p-5">
               <h2 className="text-sm font-semibold text-muted">Total ingresos</h2>
-              <div className="mt-2 text-2xl font-bold">
+              <div className="mt-2 text-xl font-bold sm:text-2xl">
                 <MontoDisplay monto={estado?.total_ingresos ?? 0} tipo="neutro" className="!text-success" />
               </div>
             </div>
           </section>
 
           <section>
-            <div className="rounded-2xl border border-danger/30 bg-red-50 p-5 shadow">
+            <div className="rounded-2xl border border-danger/30 bg-red-50 p-4 shadow sm:p-5">
               <h2 className="text-sm font-semibold text-muted">Total egresos</h2>
-              <div className="mt-2 text-2xl font-bold">
+              <div className="mt-2 text-xl font-bold sm:text-2xl">
                 <MontoDisplay monto={estado?.total_egresos ?? 0} tipo="neutro" className="!text-danger" />
               </div>
             </div>
           </section>
         </div>
 
-        <section className="overflow-hidden rounded-2xl border border-muted/20 bg-surface p-6 shadow-sm">
+        <section className="overflow-hidden rounded-2xl border border-muted/20 bg-surface p-4 shadow-sm sm:p-6">
           <h2 className="mb-4 font-semibold text-primary">Resumen rápido</h2>
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
               <div className="text-sm text-muted">Total alumnos activos</div>
-              <div className="mt-2 text-3xl font-bold text-primary">{totalAlumnos}</div>
+              <div className="mt-2 text-2xl font-bold text-primary sm:text-3xl">{totalAlumnos}</div>
             </div>
             <div className="rounded-xl border border-success/30 bg-green-50 p-4">
               <div className="text-sm text-muted">Alumnos al día</div>
-              <div className="mt-2 text-3xl font-bold text-success">{alumnosAlDia}</div>
+              <div className="mt-2 text-2xl font-bold text-success sm:text-3xl">{alumnosAlDia}</div>
             </div>
             <div className="rounded-xl border border-danger/30 bg-red-50 p-4">
               <div className="text-sm text-muted">Alumnos con deuda</div>
-              <div className="mt-2 text-3xl font-bold text-danger">{alumnosConDeuda}</div>
+              <div className="mt-2 text-2xl font-bold text-danger sm:text-3xl">{alumnosConDeuda}</div>
             </div>
           </div>
         </section>
 
-        <div>
+        {/* Botón full-width en mobile, auto en desktop */}
+        <div className="px-0 sm:px-0">
           <button
             type="button"
             onClick={() => setModal(true)}
-            className="w-full rounded-xl bg-primary px-6 py-4 text-center text-lg font-medium text-white shadow-lg hover:bg-primary/90 md:w-auto"
+            className="h-14 w-full rounded-xl bg-primary px-6 py-3 text-center text-lg font-medium text-white shadow-lg hover:bg-primary/90 active:bg-primary/80 sm:w-auto sm:px-8"
           >
             + Nuevo movimiento
           </button>
         </div>
 
+        {/* Tabla con scroll horizontal en mobile */}
         <section className="overflow-hidden rounded-2xl border border-muted/20 bg-surface shadow-sm">
           <h2 className="border-b border-muted/15 bg-bg px-4 py-3 font-semibold text-primary">
             Últimos movimientos
@@ -135,11 +140,11 @@ export default function Dashboard() {
             <table className="w-full min-w-[640px] text-left text-sm">
               <thead className="bg-bg text-muted">
                 <tr>
-                  <th className="px-4 py-2 font-semibold">Fecha</th>
-                  <th className="px-4 py-2 font-semibold">Tipo</th>
-                  <th className="px-4 py-2 font-semibold">Descripción</th>
-                  <th className="px-4 py-2 font-semibold">Monto</th>
-                  <th className="px-4 py-2 font-semibold">Folio</th>
+                  <th className="px-4 py-3 font-semibold">Fecha</th>
+                  <th className="px-4 py-3 font-semibold">Tipo</th>
+                  <th className="px-4 py-3 font-semibold">Descripción</th>
+                  <th className="px-4 py-3 font-semibold">Monto</th>
+                  <th className="px-4 py-3 font-semibold">Folio</th>
                 </tr>
               </thead>
               <tbody>
@@ -152,10 +157,10 @@ export default function Dashboard() {
                 ) : (
                   movimientos.map((m) => (
                     <tr key={m.id} className="border-t border-muted/10 hover:bg-bg/80">
-                      <td className="px-4 py-2 whitespace-nowrap">{m.fecha}</td>
-                      <td className="px-4 py-2">
+                      <td className="px-4 py-3 whitespace-nowrap">{m.fecha}</td>
+                      <td className="px-4 py-3">
                         <span
-                          className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${
+                          className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
                             m.tipo === "ingreso"
                               ? "bg-green-100 text-success"
                               : "bg-red-100 text-danger"
@@ -164,11 +169,11 @@ export default function Dashboard() {
                           {m.tipo === "ingreso" ? "Ingreso" : "Egreso"}
                         </span>
                       </td>
-                      <td className="px-4 py-2">{m.descripcion}</td>
-                      <td className="px-4 py-2">
+                      <td className="px-4 py-3">{m.descripcion}</td>
+                      <td className="px-4 py-3">
                         <MontoDisplay monto={m.monto} tipo={m.tipo} />
                       </td>
-                      <td className="px-4 py-2 font-mono text-xs">{m.folio}</td>
+                      <td className="px-4 py-3 font-mono text-xs">{m.folio}</td>
                     </tr>
                   ))
                 )}

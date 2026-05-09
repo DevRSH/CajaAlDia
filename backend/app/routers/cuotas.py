@@ -9,11 +9,25 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.folio_util import construir_folio
-from app.models import Alumno, Apoderado, ConfigCuota, Curso, FolioSecuencia, Movimiento, NotificacionEmail, PagoCuota
+from app.models import (
+    Alumno,
+    Apoderado,
+    ConfigCuota,
+    Curso,
+    CuotaEspecialAlumno,
+    FolioSecuencia,
+    Movimiento,
+    NotificacionEmail,
+    PagoCuota,
+)
 from app.schemas import (
     AlumnoEstadoCuota,
     ConfigCuotaCrear,
     ConfigCuotaResponse,
+    ConfigCuotasListResponse,
+    CuotaEspecialAlumnoResponse,
+    CuotaEspecialEstado,
+    CuotaEstadoCompletoResponse,
     CuotaEstadoResponse,
     EstadoCuota,
     MesEstadoCuota,
@@ -37,55 +51,119 @@ def crear_config_cuota(
     body: ConfigCuotaCrear,
     db: Session = Depends(get_db),
 ):
-    """Crea una configuración de cuota mensual para un curso."""
+    """Crea una configuración de cuota mensual o especial para un curso."""
     try:
         curso = db.execute(select(Curso).where(Curso.id == body.curso_id)).scalar_one_or_none()
         if curso is None:
             raise HTTPException(status_code=404, detail="No se encontró el curso indicado.")
 
+        # Para cuotas especiales, verificar si ya existe una con el mismo nombre
+        if body.tipo == "especial":
+            existente = db.execute(
+                select(ConfigCuota).where(
+                    ConfigCuota.curso_id == body.curso_id,
+                    ConfigCuota.año == body.anio,
+                    ConfigCuota.tipo == "especial",
+                    ConfigCuota.nombre_especial == body.nombre_especial,
+                )
+            ).scalar_one_or_none()
+            if existente:
+                raise HTTPException(
+                    status_code=409,
+                    detail=f"Ya existe una cuota especial con el nombre '{body.nombre_especial}' para este año."
+                )
+
         config = ConfigCuota(
             id=str(uuid.uuid4()),
             curso_id=body.curso_id,
             año=body.anio,
-            mes=body.mes,
+            mes=body.mes if body.mes is not None else 0,
             monto=body.monto,
             descripcion=body.descripcion.strip(),
+            tipo=body.tipo,
+            nombre_especial=body.nombre_especial.strip() if body.nombre_especial else None,
         )
         db.add(config)
+        db.flush()  # Para obtener el ID antes de commit
+
+        # Si hay alumno_ids específicos, crear las relaciones en la tabla pivot
+        if body.tipo == "especial" and body.alumno_ids:
+            for alumno_id in body.alumno_ids:
+                # Verificar que el alumno existe y pertenece al curso
+                alumno = db.execute(
+                    select(Alumno).where(Alumno.id == alumno_id, Alumno.curso_id == body.curso_id)
+                ).scalar_one_or_none()
+                if alumno is None:
+                    raise HTTPException(
+                        status_code=404,
+                        detail=f"No se encontró el alumno con ID {alumno_id} en este curso."
+                    )
+
+                rel = CuotaEspecialAlumno(
+                    id=str(uuid.uuid4()),
+                    config_cuota_id=config.id,
+                    alumno_id=alumno_id,
+                )
+                db.add(rel)
+
         db.commit()
         db.refresh(config)
         return config
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(
-            status_code=409,
-            detail="Ya existe una configuración de cuota para este mes y año."
-        )
     except HTTPException:
+        db.rollback()
         raise
+    except IntegrityError as e:
+        db.rollback()
+        # Si es cuota de curso, puede ser el unique constraint
+        if body.tipo == "curso":
+            raise HTTPException(
+                status_code=409,
+                detail="Ya existe una configuración de cuota para este mes y año."
+            )
+        raise HTTPException(status_code=409, detail=f"Error de integridad: {str(e)}")
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error al crear configuración de cuota: {e!s}") from e
 
 
-@router.get("/cuotas/config", response_model=list[ConfigCuotaResponse])
+@router.get("/cuotas/config", response_model=ConfigCuotasListResponse)
 def listar_config_cuotas(
     curso_id: str = Query(..., description="UUID del curso"),
     anio: int = Query(..., description="Año"),
     db: Session = Depends(get_db),
 ):
-    """Lista las configuraciones de cuota de un curso para un año."""
+    """Lista las configuraciones de cuota de un curso para un año, separadas por tipo."""
     try:
         curso = db.execute(select(Curso).where(Curso.id == curso_id)).scalar_one_or_none()
         if curso is None:
             raise HTTPException(status_code=404, detail="No se encontró el curso indicado.")
 
-        configs = db.execute(
+        # Cuotas de curso (tipo="curso")
+        cuotas_curso = db.execute(
             select(ConfigCuota)
-            .where(ConfigCuota.curso_id == curso_id, ConfigCuota.año == anio)
+            .where(
+                ConfigCuota.curso_id == curso_id,
+                ConfigCuota.año == anio,
+                ConfigCuota.tipo == "curso",
+            )
             .order_by(ConfigCuota.mes.asc())
         ).scalars().all()
-        return list(configs)
+
+        # Cuotas especiales (tipo="especial")
+        cuotas_especiales = db.execute(
+            select(ConfigCuota)
+            .where(
+                ConfigCuota.curso_id == curso_id,
+                ConfigCuota.año == anio,
+                ConfigCuota.tipo == "especial",
+            )
+            .order_by(ConfigCuota.created_at.desc())
+        ).scalars().all()
+
+        return ConfigCuotasListResponse(
+            cuotas_curso=[ConfigCuotaResponse.model_validate(c) for c in cuotas_curso],
+            cuotas_especiales=[ConfigCuotaResponse.model_validate(c) for c in cuotas_especiales],
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -287,18 +365,44 @@ def estado_cuotas(
     anio: int = Query(..., description="Año"),
     db: Session = Depends(get_db),
 ):
-    """Retorna la matriz de estado de cuotas por alumno y mes."""
+    """Retorna la matriz de estado de cuotas por alumno y mes, incluyendo cuotas especiales."""
     try:
         curso = db.execute(select(Curso).where(Curso.id == curso_id)).scalar_one_or_none()
         if curso is None:
             raise HTTPException(status_code=404, detail="No se encontró el curso indicado.")
 
-        # Obtener configuraciones del año
+        # Obtener configuraciones del año (solo cuotas de curso tipo="curso")
         configs = db.execute(
             select(ConfigCuota)
-            .where(ConfigCuota.curso_id == curso_id, ConfigCuota.año == anio)
+            .where(
+                ConfigCuota.curso_id == curso_id,
+                ConfigCuota.año == anio,
+                ConfigCuota.tipo == "curso",
+            )
             .order_by(ConfigCuota.mes.asc())
         ).scalars().all()
+
+        # Obtener cuotas especiales del año
+        configs_especiales = db.execute(
+            select(ConfigCuota)
+            .where(
+                ConfigCuota.curso_id == curso_id,
+                ConfigCuota.año == anio,
+                ConfigCuota.tipo == "especial",
+            )
+        ).scalars().all()
+
+        # Obtener alumnos específicos para cada cuota especial
+        alumnos_especiales_map = {}  # config_cuota_id -> set(alumno_ids)
+        for config_esp in configs_especiales:
+            rels = db.execute(
+                select(CuotaEspecialAlumno.alumno_id).where(
+                    CuotaEspecialAlumno.config_cuota_id == config_esp.id
+                )
+            ).scalars().all()
+            if rels:
+                alumnos_especiales_map[config_esp.id] = set(rels)
+            # Si no hay filas, aplica a todos
 
         # Obtener alumnos activos ordenados por apellido
         alumnos = db.execute(
@@ -324,6 +428,7 @@ def estado_cuotas(
             total_pagado = 0
             total_pendiente = 0
 
+            # Cuotas del curso
             for config in configs:
                 pago = pagos_map.get((alumno.id, config.id))
                 pagado = pago is not None
@@ -569,3 +674,92 @@ def notificar_deuda(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error al notificar deuda: {e!s}") from e
+
+
+@router.get("/cuotas/especial/{config_cuota_id}/estado")
+def estado_cuota_especial(
+    config_cuota_id: str,
+    db: Session = Depends(get_db),
+):
+    """Retorna el estado de pago de una cuota específica por alumno."""
+    try:
+        config = db.execute(
+            select(ConfigCuota).where(ConfigCuota.id == config_cuota_id)
+        ).scalar_one_or_none()
+        if config is None:
+            raise HTTPException(status_code=404, detail="No se encontró la cuota indicada.")
+
+        # Obtener alumnos a los que aplica la cuota
+        alumnos_especiales = db.execute(
+            select(CuotaEspecialAlumno.alumno_id).where(
+                CuotaEspecialAlumno.config_cuota_id == config_cuota_id
+            )
+        ).scalars().all()
+
+        # Si hay alumnos específicos, solo esos; si no, todos los del curso
+        if alumnos_especiales:
+            alumnos = db.execute(
+                select(Alumno)
+                .where(Alumno.id.in_(alumnos_especiales), Alumno.activo.is_(True))
+                .order_by(Alumno.apellido_paterno.asc())
+            ).scalars().all()
+        else:
+            alumnos = db.execute(
+                select(Alumno)
+                .where(Alumno.curso_id == config.curso_id, Alumno.activo.is_(True))
+                .order_by(Alumno.apellido_paterno.asc())
+            ).scalars().all()
+
+        # Obtener pagos para esta cuota
+        pagos = db.execute(
+            select(PagoCuota).where(PagoCuota.config_cuota_id == config_cuota_id)
+        ).scalars().all()
+        pagos_map = {p.alumno_id: p for p in pagos}
+
+        resultado = []
+        total_pagado = 0
+        total_pendiente = 0
+        pagados_count = 0
+        pendientes_count = 0
+
+        for alumno in alumnos:
+            nombre_completo = f"{alumno.apellido_paterno} {alumno.apellido_materno or ''}, {alumno.nombre}".strip()
+            pago = pagos_map.get(alumno.id)
+            pagado = pago is not None
+
+            if pagado:
+                total_pagado += config.monto
+                pagados_count += 1
+            else:
+                total_pendiente += config.monto
+                pendientes_count += 1
+
+            resultado.append(
+                {
+                    "alumno": {"id": alumno.id, "nombre_completo": nombre_completo},
+                    "pagado": pagado,
+                    "fecha_pago": pago.fecha_pago if pago else None,
+                    "folio": pago.movimiento.folio if pago else None,
+                }
+            )
+
+        return {
+            "config_cuota": {
+                "id": config.id,
+                "nombre_especial": config.nombre_especial,
+                "monto": config.monto,
+                "descripcion": config.descripcion,
+            },
+            "alumnos": resultado,
+            "resumen": {
+                "total_alumnos": len(alumnos),
+                "pagados": pagados_count,
+                "pendientes": pendientes_count,
+                "total_recaudado": total_pagado,
+                "total_pendiente": total_pendiente,
+            },
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener estado de cuota especial: {e!s}") from e
