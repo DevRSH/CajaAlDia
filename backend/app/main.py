@@ -253,21 +253,21 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(title="CajaAlDía", lifespan=lifespan)
 
-_frontend_url = os.getenv("FRONTEND_URL", "")
-_origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:5174",
-    "http://127.0.0.1:5174",
-]
-if _frontend_url:
-    _origins.append(_frontend_url.rstrip("/"))
-else:
-    _origins.append("*")
+def _get_origins() -> list[str]:
+    base = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
+    ]
+    url = os.getenv("FRONTEND_URL", "").rstrip("/")
+    if url:
+        base.append(url)
+    return base
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_origins,
+    allow_origins=_get_origins(),
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
