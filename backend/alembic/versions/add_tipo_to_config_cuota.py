@@ -1,7 +1,7 @@
 """add tipo and nombre_especial to config_cuota, create cuota_especial_alumnos table
 
 Revision ID: add_tipo_to_config_cuota
-Revises: update_notificaciones_email_tipo_nullable
+Revises: add_directiva_to_curso
 Create Date: 2026-05-08
 
 """
@@ -13,7 +13,7 @@ from sqlalchemy.dialects import sqlite
 
 # revision identifiers, used by Alembic.
 revision: str = 'add_tipo_to_config_cuota'
-down_revision: Union[str, None] = 'update_notificaciones_email_tipo_nullable'
+down_revision: Union[str, None] = 'add_directiva_to_curso'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
