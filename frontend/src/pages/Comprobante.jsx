@@ -28,7 +28,7 @@ export default function Comprobante() {
         <button
           type="button"
           className="rounded-lg bg-primary px-4 py-3 font-medium text-white"
-          onClick={() => window.print()}
+          onClick={imprimir}
         >
           Imprimir
         </button>

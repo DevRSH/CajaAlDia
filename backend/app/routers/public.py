@@ -55,7 +55,7 @@ def estado_publico(
         ).scalars().all()
 
         # Calcular resumen de cuotas
-        año_actual = date.today().year
+        año_actual = curso.año
         configs = db.execute(
             select(ConfigCuota).where(
                 ConfigCuota.curso_id == curso.id,

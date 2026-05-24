@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Calendar, Eye, FileText, Home, LogOut, Mail, Menu, Settings, Users, X } from "lucide-react";
+import { Calendar, Eye, FileText, Home, LogOut, Mail, Menu, Settings, Users, X, Download } from "lucide-react";
 import logoUrl from "@assets/logo.png";
 import { getConfiguracion, logout } from "../services/api.js";
 
@@ -9,6 +9,7 @@ export default function Sidebar() {
   const [curso, setCurso] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const [promptInstalacion, setPromptInstalacion] = useState(null);
 
   const usuarioGuardado = localStorage.getItem("cajaaldia_usuario");
   const usuario = usuarioGuardado ? JSON.parse(usuarioGuardado) : null;
@@ -26,6 +27,23 @@ export default function Sidebar() {
     }
     cargarCurso();
   }, []);
+
+  useEffect(() => {
+    function capturarPrompt(e) {
+      e.preventDefault();
+      setPromptInstalacion(e);
+    }
+    window.addEventListener("beforeinstallprompt", capturarPrompt);
+    return () => window.removeEventListener("beforeinstallprompt", capturarPrompt);
+  }, []);
+
+  async function instalarApp() {
+    if (!promptInstalacion) return;
+    promptInstalacion.prompt();
+    const { outcome } = await promptInstalacion.userChoice;
+    console.log(`Instalación: resultado del usuario = ${outcome}`);
+    setPromptInstalacion(null);
+  }
 
   async function cerrarSesion() {
     await logout();
@@ -130,6 +148,18 @@ export default function Sidebar() {
                 <p className="text-xs font-semibold text-primary truncate">{usuario.nombre}</p>
                 <p className="text-xs text-muted truncate">{usuario.email}</p>
               </div>
+            )}
+
+            {/* Botón de instalación PWA premium */}
+            {promptInstalacion && (
+              <button
+                type="button"
+                onClick={instalarApp}
+                className="flex w-full items-center gap-3 rounded-lg bg-primary/10 px-3 py-2.5 text-sm font-semibold text-primary hover:bg-primary/15 transition-all duration-300 shadow-sm border border-primary/20"
+              >
+                <Download size={18} className="animate-pulse text-primary" />
+                Instalar App
+              </button>
             )}
 
             <Link

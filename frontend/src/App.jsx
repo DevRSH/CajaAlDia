@@ -55,8 +55,8 @@ function ConfiguracionChecker({ children }) {
     );
   }
 
-  if (!configurada && location.pathname !== "/configuracion") {
-    return <Navigate to="/configuracion" replace />;
+  if (!configurada) {
+    return <Configuracion />;
   }
 
   return children;
@@ -76,28 +76,20 @@ export default function App() {
         element={
           <RequiereAuth>
             <ConfiguracionChecker>
-              <Routes>
-                <Route path="/configuracion" element={<Configuracion />} />
-                <Route
-                  path="/*"
-                  element={
-                    <div className="flex min-h-screen w-full max-w-full overflow-x-hidden">
-                      <Sidebar />
-                      <main className="flex-1 w-full md:ml-64">
-                        <Routes>
-                          <Route path="/" element={<Dashboard />} />
-                          <Route path="/alumnos" element={<Alumnos />} />
-                          <Route path="/cuotas" element={<Cuotas />} />
-                          <Route path="/reportes" element={<Reportes />} />
-                          <Route path="/comprobante/:id" element={<Comprobante />} />
-                          <Route path="/configuracion" element={<Configuracion />} />
-                          <Route path="/historial" element={<HistorialComunicaciones />} />
-                        </Routes>
-                      </main>
-                    </div>
-                  }
-                />
-              </Routes>
+              <div className="flex min-h-screen w-full max-w-full overflow-x-hidden">
+                <Sidebar />
+                <main className="flex-1 w-full md:ml-64">
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/alumnos" element={<Alumnos />} />
+                    <Route path="/cuotas" element={<Cuotas />} />
+                    <Route path="/reportes" element={<Reportes />} />
+                    <Route path="/comprobante/:id" element={<Comprobante />} />
+                    <Route path="/configuracion" element={<Configuracion />} />
+                    <Route path="/historial" element={<HistorialComunicaciones />} />
+                  </Routes>
+                </main>
+              </div>
             </ConfiguracionChecker>
           </RequiereAuth>
         }
